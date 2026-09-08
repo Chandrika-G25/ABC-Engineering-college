@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from datetime import date, timedelta
-from core.models import Department, Course, AcademicYear, Semester, StudentFee
+from core.models import Department, Course, AcademicYear, Semester, StudentProfile, StudentFee
 
 User = get_user_model()
 
@@ -19,10 +19,18 @@ class AcademicModelTests(TestCase):
             department=self.dept,
             duration_years=4
         )
-        self.student = User.objects.create_user(
+        self.user = User.objects.create_user(
             username='fee_student',
             password='Password123!',
             role=User.ROLE_STUDENT
+        )
+        self.student = StudentProfile.objects.create(
+            user=self.user,
+            student_id='22691A2843',
+            admission_number='ADM2026001',
+            full_name='Test Student',
+            email='test@student.com',
+            course=self.course
         )
 
     def test_department_creation(self):

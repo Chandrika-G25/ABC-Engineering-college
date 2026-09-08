@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}System Reports & Analytics | SMS ERP{% endblock %}
+
+{% block header_title %}System Reports & Institutional Analytics{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.75rem;">
+    <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Institutional Reports</h1>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">View enrollment statistics, department counts, and performance breakdowns.</p>
+</div>
+
+<!-- Department Distribution Cards -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card">
+        <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+            <i class="fa-solid fa-chart-pie" style="color: var(--primary-color); margin-right: 6px;"></i> Department-wise Student Count
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                    <th style="padding: 0.5rem 0;">Department</th>
+                    <th style="padding: 0.5rem 0; text-align: right;">Total Students</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in dept_stats %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem 0; font-weight: 600;">{{ d.name }} ({{ d.code }})</td>
+                        <td style="padding: 0.75rem 0; text-align: right; font-weight: 700; color: var(--primary-color);">{{ d.student_count }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="2" style="padding: 1rem 0; text-align: center; color: var(--text-muted);">No data available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+            <i class="fa-solid fa-graduation-cap" style="color: #10b981; margin-right: 6px;"></i> Course-wise Student Count
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                    <th style="padding: 0.5rem 0;">Course Program</th>
+                    <th style="padding: 0.5rem 0; text-align: right;">Total Students</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in course_stats %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem 0; font-weight: 600;">{{ c.name }}</td>
+                        <td style="padding: 0.75rem 0; text-align: right; font-weight: 700; color: #10b981;">{{ c.student_count }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="2" style="padding: 1rem 0; text-align: center; color: var(--text-muted);">No data available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Print & Export Action -->
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h4 style="font-size: 1.05rem; font-weight: 700;">Browser Report Generation</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Export or print standard university compliance reports directly from your web browser.</p>
+    </div>
+    <button onclick="window.print()" class="btn btn-primary">
+        <i class="fa-solid fa-print"></i> Print Full Report
+    </button>
+</div>
+{% endblock %}

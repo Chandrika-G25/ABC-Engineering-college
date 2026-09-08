@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Marks Management | SMS ERP{% endblock %}
+
+{% block header_title %}Marks Management{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Examination Marks</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Record examination scores, calculate percentages, and track academic grades.</p>
+    </div>
+</div>
+
+<!-- Add Examination Marks Form Card -->
+<div class="card" style="margin-bottom: 2rem;">
+    <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+        <i class="fa-solid fa-pen-nib" style="color: var(--primary-color); margin-right: 6px;"></i> Add Examination Marks
+    </h3>
+
+    <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+        {% csrf_token %}
+
+        <div>
+            <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Student *</label>
+            {{ form.student }}
+        </div>
+
+        <div>
+            <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Examination *</label>
+            {{ form.exam_name }}
+        </div>
+
+        <div>
+            <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Subject *</label>
+            {{ form.subject }}
+        </div>
+
+        <div>
+            <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Obtained *</label>
+            {{ form.marks_obtained }}
+        </div>
+
+        <div>
+            <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Total *</label>
+            {{ form.total_marks }}
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; height: 42px;">
+                <i class="fa-solid fa-floppy-disk"></i> Save Marks
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Academic Performance Records Data Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 1.05rem;">
+        <i class="fa-solid fa-square-poll-vertical" style="color: var(--primary-color); margin-right: 6px;"></i> Academic Performance Records
+    </div>
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+        <thead>
+            <tr style="background-color: #f1f5f9; border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                <th style="padding: 0.85rem 1.25rem;">Roll No</th>
+                <th style="padding: 0.85rem 1.25rem;">Student Name</th>
+                <th style="padding: 0.85rem 1.25rem;">Examination</th>
+                <th style="padding: 0.85rem 1.25rem;">Subject</th>
+                <th style="padding: 0.85rem 1.25rem;">Score</th>
+                <th style="padding: 0.85rem 1.25rem;">Percentage</th>
+                <th style="padding: 0.85rem 1.25rem;">Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in marks %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--primary-color);">{{ m.student.student_id }}</td>
+                    <td style="padding: 1rem 1.25rem; font-weight: 600;">{{ m.student.full_name }}</td>
+                    <td style="padding: 1rem 1.25rem;">{{ m.exam_name }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-muted);">{{ m.subject }}</td>
+                    <td style="padding: 1rem 1.25rem; font-weight: 700;">{{ m.marks_obtained }} / {{ m.total_marks }}</td>
+                    <td style="padding: 1rem 1.25rem; color: #2563eb; font-weight: 600;">{{ m.percentage }}%</td>
+                    <td style="padding: 1rem 1.25rem;">
+                        <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; background-color: #eff6ff; color: #1d4ed8;">{{ m.grade }}</span>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+                        No examination marks records available.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

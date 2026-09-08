@@ -2,7 +2,7 @@
     <div class="sidebar-header">
         <a href="/" class="sidebar-brand">
             <i class="fa-solid fa-graduation-cap" style="color: #60a5fa; font-size: 1.5rem;"></i>
-            <span>Uni</span>Portal
+            <span>SMS</span> ERP
         </a>
     </div>
 
@@ -12,15 +12,40 @@
                 <i class="fa-solid fa-chart-pie"></i> Dashboard
             </a>
         </li>
-        {% if user.is_authenticated %}
-            <li class="sidebar-item">
-                <a href="{% url 'accounts:profile' %}" class="sidebar-link">
-                    <i class="fa-solid fa-id-card"></i> My Profile
-                </a>
-            </li>
-        {% endif %}
 
-        <!-- Academic Management -->
+        <!-- Core Operations -->
+        <li class="sidebar-item">
+            <a href="{% url 'core:student_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-user-graduate"></i> Students
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{% url 'core:attendance_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-clipboard-user"></i> Attendance
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{% url 'core:marks_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-square-poll-vertical"></i> Marks
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{% url 'core:fee_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Fees
+            </a>
+        </li>
+
+        <!-- Academic Structure -->
+        <li class="sidebar-item">
+            <a href="{% url 'core:teacher_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-chalkboard-user"></i> Teachers
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{% url 'core:subject_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-book-open"></i> Subjects
+            </a>
+        </li>
         <li class="sidebar-item">
             <a href="{% url 'core:department_list' %}" class="sidebar-link">
                 <i class="fa-solid fa-building-columns"></i> Departments
@@ -42,10 +67,10 @@
             </a>
         </li>
 
-        <!-- Fee Management Engine -->
+        <!-- System Analytics & Reports -->
         <li class="sidebar-item">
-            <a href="{% url 'core:fee_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-file-invoice-dollar"></i> Fee Management
+            <a href="{% url 'core:reports' %}" class="sidebar-link">
+                <i class="fa-solid fa-chart-line"></i> Reports
             </a>
         </li>
     </ul>

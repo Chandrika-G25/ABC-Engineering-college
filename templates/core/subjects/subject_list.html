@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Subject Management | SMS ERP{% endblock %}
+
+{% block header_title %}Academic Subjects Directory{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Academic Subjects</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Manage course subjects, credits, and assigned faculty instructors.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+    <!-- Add Subject Form Card -->
+    {% if user.is_admin_user %}
+        <div class="card" style="height: fit-content;">
+            <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <i class="fa-solid fa-plus-circle" style="color: var(--primary-color); margin-right: 6px;"></i> Add Academic Subject
+            </h3>
+            <form method="POST">
+                {% csrf_token %}
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Subject Code *</label>
+                    {{ form.code }}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Subject Name *</label>
+                    {{ form.name }}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Course Program *</label>
+                    {{ form.course }}
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Credits</label>
+                        {{ form.credits }}
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Type</label>
+                        {{ form.subject_type }}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Assigned Teacher</label>
+                    {{ form.assigned_teacher }}
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fa-solid fa-plus"></i> Save Subject
+                </button>
+            </form>
+        </div>
+    {% endif %}
+
+    <!-- Subjects Data Table -->
+    <div class="card" style="padding: 0; overflow: hidden; grid-column: {% if user.is_admin_user %}span 1{% else %}span 2{% endif %};">
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 1.05rem;">
+            <i class="fa-solid fa-book-open" style="color: var(--primary-color); margin-right: 6px;"></i> Subjects Directory
+        </div>
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+            <thead>
+                <tr style="background-color: #f1f5f9; border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <th style="padding: 0.85rem 1.25rem;">Code</th>
+                    <th style="padding: 0.85rem 1.25rem;">Subject Name</th>
+                    <th style="padding: 0.85rem 1.25rem;">Course</th>
+                    <th style="padding: 0.85rem 1.25rem;">Instructor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in subjects %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--primary-color);">{{ s.code }}</td>
+                        <td style="padding: 1rem 1.25rem; font-weight: 600;">{{ s.name }}</td>
+                        <td style="padding: 1rem 1.25rem; color: var(--text-muted);">{{ s.course.name }}</td>
+                        <td style="padding: 1rem 1.25rem;">{{ s.assigned_teacher.full_name|default:"Unassigned" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+                            No subjects registered.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
