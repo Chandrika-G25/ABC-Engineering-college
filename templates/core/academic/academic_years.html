@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Academic Years | Student Management System{% endblock %}
+
+{% block header_title %}Academic Year Management{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+    <!-- Add Academic Year Form Card -->
+    {% if user.is_admin_user %}
+        <div class="card" style="height: fit-content;">
+            <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <i class="fa-solid fa-calendar-plus" style="color: var(--primary-color); margin-right: 6px;"></i> Add Academic Year
+            </h3>
+            <form method="POST">
+                {% csrf_token %}
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Academic Year Label *</label>
+                    {{ form.name }}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Start Date *</label>
+                    {{ form.start_date }}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">End Date *</label>
+                    {{ form.end_date }}
+                </div>
+
+                <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    {{ form.is_current }}
+                    <label for="{{ form.is_current.id_for_label }}" style="font-weight:600; font-size:0.85rem; cursor:pointer;">Set as Currently Active Year</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fa-solid fa-plus"></i> Save Academic Year
+                </button>
+            </form>
+        </div>
+    {% endif %}
+
+    <!-- Academic Years List Card -->
+    <div class="card" style="padding: 0; overflow: hidden; grid-column: {% if user.is_admin_user %}span 1{% else %}span 2{% endif %};">
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-calendar-days" style="color: var(--primary-color); margin-right: 6px;"></i> Academic Years List</span>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+            <thead>
+                <tr style="background-color: #f1f5f9; border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <th style="padding: 0.85rem 1.25rem;">Academic Year</th>
+                    <th style="padding: 0.85rem 1.25rem;">Start Date</th>
+                    <th style="padding: 0.85rem 1.25rem;">End Date</th>
+                    <th style="padding: 0.85rem 1.25rem;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for yr in years %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem 1.25rem; font-weight: 700;">{{ yr.name }}</td>
+                        <td style="padding: 1rem 1.25rem;">{{ yr.start_date|date:"Y-m-d" }}</td>
+                        <td style="padding: 1rem 1.25rem;">{{ yr.end_date|date:"Y-m-d" }}</td>
+                        <td style="padding: 1rem 1.25rem;">
+                            {% if yr.is_current %}
+                                <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background-color: #dcfce7; color: #166534;">Active (Current)</span>
+                            {% else %}
+                                <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; color: #64748b; background-color: #f1f5f9;">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                            No academic years defined yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

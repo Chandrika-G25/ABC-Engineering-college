@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Department Management | Student Management System{% endblock %}
+
+{% block header_title %}Department Management{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Academic Departments</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Manage college faculties, codes, and heads of department.</p>
+    </div>
+    {% if user.is_admin_user %}
+        <a href="{% url 'core:department_add' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Add Department
+        </a>
+    {% endif %}
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="card" style="margin-bottom: 1.5rem; padding: 1rem;">
+    <form method="GET" style="display: flex; gap: 1rem;">
+        <input type="text" name="search" value="{{ search_query }}" class="form-input" placeholder="Search by name or code..." style="max-width: 300px;">
+        <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        {% if search_query %}
+            <a href="{% url 'core:department_list' %}" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Department Data Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+        <thead>
+            <tr style="background-color: #f1f5f9; border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                <th style="padding: 0.85rem 1.25rem;">Code</th>
+                <th style="padding: 0.85rem 1.25rem;">Department Name</th>
+                <th style="padding: 0.85rem 1.25rem;">Head of Dept (HOD)</th>
+                <th style="padding: 0.85rem 1.25rem;">Status</th>
+                <th style="padding: 0.85rem 1.25rem; text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dept in departments %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--primary-color);">{{ dept.code }}</td>
+                    <td style="padding: 1rem 1.25rem; font-weight: 600;">{{ dept.name }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-muted);">
+                        {% if dept.head_of_department %}
+                            <i class="fa-solid fa-user-tie" style="margin-right: 4px;"></i> {{ dept.head_of_department.get_full_name|default:dept.head_of_department.username }}
+                        {% else %}
+                            <span style="font-style: italic; color: #94a3b8;">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem 1.25rem;">
+                        {% if dept.is_active %}
+                            <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background-color: #dcfce7; color: #166534;">Active</span>
+                        {% else %}
+                            <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background-color: #fee2e2; color: #991b1b;">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem 1.25rem; text-align: right;">
+                        {% if user.is_admin_user %}
+                            <a href="{% url 'core:department_edit' dept.pk %}" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" title="Edit">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </a>
+                        {% else %}
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">View Only</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+                        <i class="fa-solid fa-building-circle-xmark" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                        No departments found. {% if user.is_admin_user %}<a href="{% url 'core:department_add' %}">Create one now</a>.{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

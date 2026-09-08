@@ -18,22 +18,31 @@
                     <i class="fa-solid fa-id-card"></i> My Profile
                 </a>
             </li>
-            <li class="sidebar-item">
-                <a href="{% url 'accounts:change_password' %}" class="sidebar-link">
-                    <i class="fa-solid fa-shield-halved"></i> Change Password
-                </a>
-            </li>
         {% endif %}
+
+        <!-- Academic Management -->
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'core:department_list' %}" class="sidebar-link">
                 <i class="fa-solid fa-building-columns"></i> Departments
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'core:course_list' %}" class="sidebar-link">
                 <i class="fa-solid fa-book-bookmark"></i> Courses
             </a>
         </li>
+        <li class="sidebar-item">
+            <a href="{% url 'core:academic_year_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-calendar-days"></i> Academic Years
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{% url 'core:semester_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-layer-group"></i> Semesters
+            </a>
+        </li>
+
+        <!-- Future Modules Placeholder -->
         <li class="sidebar-item">
             <a href="#" class="sidebar-link">
                 <i class="fa-solid fa-user-graduate"></i> Students
