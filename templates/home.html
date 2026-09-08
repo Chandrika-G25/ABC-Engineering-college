@@ -1,27 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %}Home | Student Management System{% endblock %}
+{% block title %}Dashboard Overview | Student Management System{% endblock %}
 
-{% block header_title %}System Overview & Welcome{% endblock %}
+{% block header_title %}University System Dashboard{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 2rem;">
-    <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
-        Welcome to Student Management System
-    </h1>
-    <p style="color: var(--text-muted); font-size: 0.95rem;">
-        A high-performance full-stack web application powered by Django 5.x and MySQL Server.
-    </p>
+<div style="margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1 style="font-size: 1.65rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">
+            System Control Center
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Real-time analytics and management overview for <strong>{{ current_year.name|default:"Active Academic Session" }}</strong>.
+        </p>
+    </div>
+    {% if user.is_admin_user %}
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'core:department_add' %}" class="btn btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.85rem;">
+                <i class="fa-solid fa-plus"></i> Dept
+            </a>
+            <a href="{% url 'core:course_add' %}" class="btn btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.85rem;">
+                <i class="fa-solid fa-plus"></i> Course
+            </a>
+            <a href="{% url 'core:fee_add' %}" class="btn btn-primary" style="padding: 0.5rem 0.85rem; font-size: 0.85rem;">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Issue Fee
+            </a>
+        </div>
+    {% endif %}
 </div>
 
-<!-- Overview Quick Stats -->
+<!-- Primary System Metrics Grid -->
 <div class="grid-stats">
     <div class="card stat-card">
-        <div class="stat-icon">
+        <div class="stat-icon" style="background-color: #eff6ff; color: #2563eb;">
             <i class="fa-solid fa-user-graduate"></i>
         </div>
         <div>
-            <div class="stat-val">0</div>
+            <div class="stat-val">{{ students_count }}</div>
             <div class="stat-lbl">Enrolled Students</div>
         </div>
     </div>
@@ -31,8 +46,8 @@
             <i class="fa-solid fa-chalkboard-user"></i>
         </div>
         <div>
-            <div class="stat-val">0</div>
-            <div class="stat-lbl">Active Faculty</div>
+            <div class="stat-val">{{ teachers_count }}</div>
+            <div class="stat-lbl">Faculty Teachers</div>
         </div>
     </div>
 
@@ -41,8 +56,8 @@
             <i class="fa-solid fa-building-columns"></i>
         </div>
         <div>
-            <div class="stat-val">0</div>
-            <div class="stat-lbl">Departments</div>
+            <div class="stat-val">{{ dept_count }}</div>
+            <div class="stat-lbl">Active Departments</div>
         </div>
     </div>
 
@@ -51,21 +66,96 @@
             <i class="fa-solid fa-book-bookmark"></i>
         </div>
         <div>
-            <div class="stat-val">0</div>
+            <div class="stat-val">{{ course_count }}</div>
             <div class="stat-lbl">Offered Courses</div>
         </div>
     </div>
 </div>
 
-<div class="card">
-    <h3 class="card-title"><i class="fa-solid fa-circle-info" style="color: var(--primary-color); margin-right: 0.5rem;"></i> System Status & Database Verification</h3>
-    <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
-        Stage 1 environment setup and database initialization is fully verified. Django engine is connected directly to MySQL database <code>student_management_db</code> running on localhost.
-    </p>
-    <div style="background-color: var(--bg-body); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-family: monospace; font-size: 0.875rem;">
-        <div><strong>Database Engine:</strong> django.db.backends.mysql (via PyMySQL)</div>
-        <div><strong>Connected DB:</strong> {{ db_name }}</div>
-        <div><strong>Server Status:</strong> <span style="color: var(--success-color); font-weight: bold;">● Active & Operational</span></div>
+<!-- Financial Fee Collection Overview Grid -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+            <h3 class="card-title" style="margin-bottom: 0;">
+                <i class="fa-solid fa-wallet" style="color: #10b981; margin-right: 6px;"></i> Fee Collection Financial Metrics
+            </h3>
+            <a href="{% url 'core:fee_list' %}" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none; font-weight: 600;">View All Fees &rarr;</a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; text-align: center;">
+            <div style="background-color: var(--bg-body); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Total Billed</span>
+                <strong style="font-size: 1.25rem; color: var(--text-main);">₹{{ total_fee_billed|floatformat:2 }}</strong>
+            </div>
+            <div style="background-color: #f0fdf4; padding: 1rem; border-radius: 8px; border: 1px solid #bbf7d0;">
+                <span style="font-size: 0.8rem; color: #166534; display: block; margin-bottom: 0.25rem;">Collected Revenue</span>
+                <strong style="font-size: 1.25rem; color: #15803d;">₹{{ total_fee_collected|floatformat:2 }}</strong>
+            </div>
+            <div style="background-color: #fef2f2; padding: 1rem; border-radius: 8px; border: 1px solid #fecaca;">
+                <span style="font-size: 0.8rem; color: #991b1b; display: block; margin-bottom: 0.25rem;">Pending Due</span>
+                <strong style="font-size: 1.25rem; color: #b91c1c;">₹{{ total_fee_pending|floatformat:2 }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Academic Session Card -->
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+            <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 0.75rem;">
+                <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary-color); margin-right: 6px;"></i> Active Academic Session
+            </h3>
+            <div style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.5rem;">
+                <strong>Academic Year:</strong> {{ current_year.name|default:"Not configured" }}
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.5rem;">
+                <strong>Active Term:</strong> {{ current_sem.name|default:"Not configured" }}
+            </div>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); pt: 0.5rem;">
+            <i class="fa-solid fa-circle-check" style="color: #10b981; margin-right: 4px;"></i> MySQL Engine Status: Healthy
+        </div>
+    </div>
+</div>
+
+<!-- Department & Course Overview Lists -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.95rem;"><i class="fa-solid fa-building-columns" style="color: var(--primary-color); margin-right: 6px;"></i> Recent Departments</span>
+            <a href="{% url 'core:department_list' %}" style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600; text-decoration: none;">View All</a>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <tbody>
+                {% for dept in recent_departments %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem 1.25rem; font-weight: 700; color: var(--primary-color);">{{ dept.code }}</td>
+                        <td style="padding: 0.75rem 1.25rem;">{{ dept.name }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td style="padding: 1.5rem; text-align: center; color: var(--text-muted);">No active departments.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.95rem;"><i class="fa-solid fa-book-bookmark" style="color: var(--primary-color); margin-right: 6px;"></i> Featured Course Programs</span>
+            <a href="{% url 'core:course_list' %}" style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600; text-decoration: none;">View All</a>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <tbody>
+                {% for course in recent_courses %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem 1.25rem; font-weight: 700; color: var(--primary-color);">{{ course.code }}</td>
+                        <td style="padding: 0.75rem 1.25rem;">{{ course.name }}</td>
+                        <td style="padding: 0.75rem 1.25rem; color: var(--text-muted);">{{ course.duration_years }} yrs</td>
+                    </tr>
+                {% empty %}
+                    <tr><td style="padding: 1.5rem; text-align: center; color: var(--text-muted);">No active courses.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

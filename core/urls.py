@@ -19,4 +19,9 @@ urlpatterns = [
     # Academic Year & Semester URLs
     path('academic-years/', views.academic_year_list_view, name='academic_year_list'),
     path('semesters/', views.semester_list_view, name='semester_list'),
+
+    # Fee Management URLs
+    path('fees/', views.fee_list_view, name='fee_list'),
+    path('fees/add/', views.fee_create_view, name='fee_add'),
+    path('fees/<int:pk>/pay/', views.fee_pay_view, name='fee_pay'),
 ]

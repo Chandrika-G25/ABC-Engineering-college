@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | Student Management System{% endblock %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+            <i class="fa-solid fa-file-invoice-dollar" style="color: var(--primary-color); margin-right: 6px;"></i> {{ title }}
+        </h3>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Select Student *</label>
+                {{ form.student }}
+                {% if form.student.errors %}<div style="color:red; font-size:0.8rem;">{{ form.student.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Invoice Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div style="color:red; font-size:0.8rem;">{{ form.title.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Fee Category</label>
+                    {{ form.fee_type }}
+                </div>
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Course Program</label>
+                    {{ form.course }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Total Fee Amount (₹) *</label>
+                    {{ form.total_amount }}
+                </div>
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Paid Amount (₹)</label>
+                    {{ form.paid_amount }}
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Payment Due Date *</label>
+                {{ form.due_date }}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Issue Fee Invoice
+                </button>
+                <a href="{% url 'core:fee_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

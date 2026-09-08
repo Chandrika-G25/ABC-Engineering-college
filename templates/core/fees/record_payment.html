@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Payment | Student Management System{% endblock %}
+
+{% block header_title %}Record Fee Payment{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <div class="card">
+        <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+            <i class="fa-solid fa-hand-holding-dollar" style="color: var(--primary-color); margin-right: 6px;"></i> Record Payment
+        </h3>
+
+        <div style="background-color: var(--bg-body); padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.9rem; border: 1px solid var(--border-color);">
+            <div><strong>Student:</strong> {{ fee.student.get_full_name|default:fee.student.username }}</div>
+            <div><strong>Invoice:</strong> {{ fee.title }}</div>
+            <div><strong>Total Fee Billed:</strong> ₹{{ fee.total_amount }}</div>
+            <div><strong>Amount Already Paid:</strong> ₹{{ fee.paid_amount }}</div>
+            <div style="color: var(--danger-color); font-weight: 700; margin-top: 0.25rem;">
+                Remaining Due: ₹{{ fee.remaining_due }}
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Payment Amount (₹) *</label>
+                {{ form.payment_amount }}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-check"></i> Submit Payment
+                </button>
+                <a href="{% url 'core:fee_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

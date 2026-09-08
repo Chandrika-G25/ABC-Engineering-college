@@ -2,21 +2,55 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
+from django.db.models import Sum, Q, Count
+from django.contrib.auth import get_user_model
+from datetime import datetime, date
 from accounts.decorators import admin_required
-from .models import Department, Course, AcademicYear, Semester
-from .forms import DepartmentForm, CourseForm, AcademicYearForm, SemesterForm
+from .models import Department, Course, AcademicYear, Semester, StudentFee
+from .forms import DepartmentForm, CourseForm, AcademicYearForm, SemesterForm, StudentFeeForm, RecordPaymentForm
+
+User = get_user_model()
 
 def home_view(request):
     """
-    Renders the central system overview page with stats from core models.
+    Renders the enhanced central system overview dashboard with live metrics, fee collection statistics, and status checks.
     """
+    students_count = User.objects.filter(role=User.ROLE_STUDENT).count()
+    teachers_count = User.objects.filter(role=User.ROLE_TEACHER).count()
+    dept_count = Department.objects.filter(is_active=True).count()
+    course_count = Course.objects.filter(is_active=True).count()
+    
+    current_year = AcademicYear.objects.filter(is_current=True).first()
+    current_sem = Semester.objects.filter(is_current=True).first()
+
+    # Fee metrics calculation
+    fee_aggregates = StudentFee.objects.aggregate(
+        total=Sum('total_amount'),
+        paid=Sum('paid_amount')
+    )
+    total_fee_billed = fee_aggregates['total'] or 0.00
+    total_fee_collected = fee_aggregates['paid'] or 0.00
+    total_fee_pending = total_fee_billed - total_fee_collected
+    overdue_count = StudentFee.objects.filter(status=StudentFee.STATUS_OVERDUE).count()
+
+    # Recent activity logs & Quick summary
+    recent_departments = Department.objects.filter(is_active=True).order_by('-created_at')[:4]
+    recent_courses = Course.objects.filter(is_active=True).select_related('department').order_by('-created_at')[:4]
+
     context = {
         'db_name': settings.DATABASES['default']['NAME'],
-        'current_year': 2026,
-        'department_count': Department.objects.filter(is_active=True).count(),
-        'course_count': Course.objects.filter(is_active=True).count(),
-        'current_academic_year': AcademicYear.objects.filter(is_current=True).first(),
-        'current_semester': Semester.objects.filter(is_current=True).first(),
+        'students_count': students_count,
+        'teachers_count': teachers_count,
+        'dept_count': dept_count,
+        'course_count': course_count,
+        'current_year': current_year,
+        'current_sem': current_sem,
+        'total_fee_billed': total_fee_billed,
+        'total_fee_collected': total_fee_collected,
+        'total_fee_pending': total_fee_pending,
+        'overdue_count': overdue_count,
+        'recent_departments': recent_departments,
+        'recent_courses': recent_courses,
     }
     return render(request, 'home.html', context)
 
@@ -177,5 +211,88 @@ def semester_list_view(request):
 
     return render(request, 'core/academic/semesters.html', {
         'semesters': semesters,
+        'form': form
+    })
+
+
+# ==========================================
+# FEE MANAGEMENT VIEWS
+# ==========================================
+
+@login_required
+def fee_list_view(request):
+    fees = StudentFee.objects.all().select_related('student', 'course', 'academic_year')
+    
+    # Filter for student role vs admin role
+    if request.user.is_student:
+        fees = fees.filter(student=request.user)
+
+    search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')
+
+    if search_query:
+        fees = fees.filter(
+            Q(student__username__icontains=search_query) |
+            Q(student__first_name__icontains=search_query) |
+            Q(title__icontains=search_query)
+        )
+    if status_filter:
+        fees = fees.filter(status=status_filter)
+
+    fee_aggregates = fees.aggregate(
+        total=Sum('total_amount'),
+        paid=Sum('paid_amount')
+    )
+    total_billed = fee_aggregates['total'] or 0.00
+    total_paid = fee_aggregates['paid'] or 0.00
+    total_due = total_billed - total_paid
+
+    return render(request, 'core/fees/fee_list.html', {
+        'fees': fees,
+        'search_query': search_query,
+        'selected_status': status_filter,
+        'total_billed': total_billed,
+        'total_paid': total_paid,
+        'total_due': total_due,
+        'status_choices': StudentFee.STATUS_CHOICES,
+    })
+
+
+@admin_required
+def fee_create_view(request):
+    if request.method == 'POST':
+        form = StudentFeeForm(request.POST)
+        if form.is_valid():
+            fee = form.save()
+            messages.success(request, f"Fee invoice '{fee.title}' assigned to {fee.student.username} successfully!")
+            return redirect('core:fee_list')
+        else:
+            messages.error(request, "Error creating fee invoice.")
+    else:
+        form = StudentFeeForm()
+
+    return render(request, 'core/fees/fee_form.html', {
+        'form': form,
+        'title': 'Create Student Fee Invoice'
+    })
+
+
+@admin_required
+def fee_pay_view(request, pk):
+    fee = get_object_or_404(StudentFee, pk=pk)
+    if request.method == 'POST':
+        form = RecordPaymentForm(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data['payment_amount']
+            fee.paid_amount += amount
+            fee.payment_date = datetime.now()
+            fee.save()
+            messages.success(request, f"Payment of ₹{amount} recorded for {fee.student.username}. New status: {fee.get_status_display()}.")
+            return redirect('core:fee_list')
+    else:
+        form = RecordPaymentForm(initial={'payment_amount': fee.remaining_due})
+
+    return render(request, 'core/fees/record_payment.html', {
+        'fee': fee,
         'form': form
     })

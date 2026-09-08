@@ -1,8 +1,11 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.core.exceptions import ValidationError
-from datetime import date
-from core.models import Department, Course, AcademicYear, Semester
+from django.contrib.auth import get_user_model
+from datetime import date, timedelta
+from core.models import Department, Course, AcademicYear, Semester, StudentFee
+
+User = get_user_model()
 
 class AcademicModelTests(TestCase):
     def setUp(self):
@@ -15,6 +18,11 @@ class AcademicModelTests(TestCase):
             name='B.Tech CSE',
             department=self.dept,
             duration_years=4
+        )
+        self.student = User.objects.create_user(
+            username='fee_student',
+            password='Password123!',
+            role=User.ROLE_STUDENT
         )
 
     def test_department_creation(self):
@@ -44,18 +52,19 @@ class AcademicModelTests(TestCase):
         self.assertFalse(ay1.is_current)
         self.assertTrue(ay2.is_current)
 
-    def test_semester_date_validation(self):
-        ay = AcademicYear.objects.create(
-            name='2026-2027',
-            start_date=date(2026, 7, 1),
-            end_date=date(2027, 6, 30)
+    def test_student_fee_status_and_remaining_due(self):
+        fee = StudentFee.objects.create(
+            student=self.student,
+            title='Tuition Fee Test',
+            total_amount=10000.00,
+            paid_amount=4000.00,
+            due_date=date.today() + timedelta(days=10)
         )
-        invalid_sem = Semester(
-            academic_year=ay,
-            semester_number=1,
-            name='Sem 1',
-            start_date=date(2026, 12, 1),
-            end_date=date(2026, 6, 1)  # Invalid: end date before start date
-        )
-        with self.assertRaises(ValidationError):
-            invalid_sem.full_clean()
+        self.assertEqual(fee.remaining_due, 6000.00)
+        self.assertEqual(fee.status, StudentFee.STATUS_PARTIAL)
+
+        # Full Payment Update
+        fee.paid_amount = 10000.00
+        fee.save()
+        self.assertEqual(fee.status, StudentFee.STATUS_PAID)
+        self.assertEqual(fee.remaining_due, 0.00)

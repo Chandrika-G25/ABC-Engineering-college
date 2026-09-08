@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Fee Management | Student Management System{% endblock %}
+
+{% block header_title %}Student Fee & Payment Center{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Fee Collection & Invoices</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Track student tuition fees, payments, and outstanding balances.</p>
+    </div>
+    {% if user.is_admin_user %}
+        <a href="{% url 'core:fee_add' %}" class="btn btn-primary">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Issue Fee Invoice
+        </a>
+    {% endif %}
+</div>
+
+<!-- Fee Collection Metrics Cards -->
+<div class="grid-stats" style="margin-bottom: 1.5rem;">
+    <div class="card stat-card">
+        <div class="stat-icon" style="background-color: #eff6ff; color: #2563eb;">
+            <i class="fa-solid fa-file-invoice"></i>
+        </div>
+        <div>
+            <div class="stat-val">₹{{ total_billed|floatformat:2 }}</div>
+            <div class="stat-lbl">Total Billed Fees</div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-icon" style="background-color: #f0fdf4; color: #10b981;">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div>
+            <div class="stat-val">₹{{ total_paid|floatformat:2 }}</div>
+            <div class="stat-lbl">Total Collected</div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-icon" style="background-color: #fef2f2; color: #ef4444;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div>
+            <div class="stat-val">₹{{ total_due|floatformat:2 }}</div>
+            <div class="stat-lbl">Outstanding Balance</div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Status Filters -->
+<div class="card" style="margin-bottom: 1.5rem; padding: 1rem;">
+    <form method="GET" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <input type="text" name="search" value="{{ search_query }}" class="form-input" placeholder="Search student or title..." style="max-width: 260px;">
+        
+        <select name="status" class="form-input" style="max-width: 200px;">
+            <option value="">-- All Statuses --</option>
+            {% for code, label in status_choices %}
+                <option value="{{ code }}" {% if selected_status == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem;"><i class="fa-solid fa-filter"></i> Filter</button>
+        {% if search_query or selected_status %}
+            <a href="{% url 'core:fee_list' %}" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Fees Data Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+        <thead>
+            <tr style="background-color: #f1f5f9; border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                <th style="padding: 0.85rem 1.25rem;">Student</th>
+                <th style="padding: 0.85rem 1.25rem;">Invoice Title</th>
+                <th style="padding: 0.85rem 1.25rem;">Total Fee</th>
+                <th style="padding: 0.85rem 1.25rem;">Paid</th>
+                <th style="padding: 0.85rem 1.25rem;">Due Date</th>
+                <th style="padding: 0.85rem 1.25rem;">Status</th>
+                <th style="padding: 0.85rem 1.25rem; text-align: right;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fee in fees %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem 1.25rem; font-weight: 600;">
+                        <i class="fa-solid fa-user-graduate" style="color: var(--primary-color); margin-right: 4px;"></i>
+                        {{ fee.student.get_full_name|default:fee.student.username }}
+                    </td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main);">{{ fee.title }}</td>
+                    <td style="padding: 1rem 1.25rem; font-weight: 700;">₹{{ fee.total_amount }}</td>
+                    <td style="padding: 1rem 1.25rem; color: #166534; font-weight: 600;">₹{{ fee.paid_amount }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-muted);">{{ fee.due_date|date:"M d, Y" }}</td>
+                    <td style="padding: 1rem 1.25rem;">
+                        {% if fee.status == 'PAID' %}
+                            <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background-color: #dcfce7; color: #166534;">Paid</span>
+                        {% elif fee.status == 'PARTIAL' %}
+                            <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background-color: #fef3c7; color: #92400e;">Partial</span>
+                        {% elif fee.status == 'OVERDUE' %}
+                            <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background-color: #fee2e2; color: #991b1b;">Overdue</span>
+                        {% else %}
+                            <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background-color: #f1f5f9; color: #475569;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem 1.25rem; text-align: right;">
+                        {% if user.is_admin_user and fee.status != 'PAID' %}
+                            <a href="{% url 'core:fee_pay' fee.pk %}" class="btn btn-primary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+                                <i class="fa-solid fa-hand-holding-dollar"></i> Collect Payment
+                            </a>
+                        {% else %}
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Completed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+                        <i class="fa-solid fa-receipt" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                        No fee records found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,5 +1,8 @@
 from django import forms
-from .models import Department, Course, AcademicYear, Semester
+from django.contrib.auth import get_user_model
+from .models import Department, Course, AcademicYear, Semester, StudentFee
+
+User = get_user_model()
 
 class DepartmentForm(forms.ModelForm):
     class Meta:
@@ -49,3 +52,29 @@ class SemesterForm(forms.ModelForm):
             'end_date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
             'is_current': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
         }
+
+class StudentFeeForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['student'].queryset = User.objects.filter(role=User.ROLE_STUDENT)
+
+    class Meta:
+        model = StudentFee
+        fields = ['student', 'title', 'fee_type', 'course', 'academic_year', 'total_amount', 'paid_amount', 'due_date']
+        widgets = {
+            'student': forms.Select(attrs={'class': 'form-input'}),
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Semester 1 Tuition Fee'}),
+            'fee_type': forms.Select(attrs={'class': 'form-input'}),
+            'course': forms.Select(attrs={'class': 'form-input'}),
+            'academic_year': forms.Select(attrs={'class': 'form-input'}),
+            'total_amount': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'placeholder': 'e.g. 45000.00'}),
+            'paid_amount': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'placeholder': '0.00'}),
+            'due_date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
+        }
+
+class RecordPaymentForm(forms.Form):
+    payment_amount = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'placeholder': 'Enter payment amount'})
+    )

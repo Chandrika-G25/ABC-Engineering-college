@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from datetime import date
 
 class Department(models.Model):
     """
@@ -33,7 +34,6 @@ class Department(models.Model):
 class Course(models.Model):
     """
     Represents an Academic Degree Program / Course (e.g. B.Tech Computer Science, BCA, MCA).
-    A Department can offer multiple Courses.
     """
     code = models.CharField(max_length=20, unique=True, help_text="Unique Course Code (e.g., BTECH-CSE)")
     name = models.CharField(max_length=100, help_text="Full Course Degree Name")
@@ -60,7 +60,6 @@ class Course(models.Model):
 class AcademicYear(models.Model):
     """
     Represents an Academic Year (e.g. 2026-2027).
-    Enforces business rule: Only one academic year can be set as current active at any time.
     """
     name = models.CharField(max_length=20, unique=True, help_text="Academic Year Label (e.g. 2026-2027)")
     start_date = models.DateField()
@@ -83,7 +82,6 @@ class AcademicYear(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         if self.is_current:
-            # Enforce single active academic year business rule
             AcademicYear.objects.filter(is_current=True).exclude(pk=self.pk).update(is_current=False)
         super().save(*args, **kwargs)
 
@@ -98,7 +96,7 @@ class Semester(models.Model):
         related_name='semesters',
         help_text="Associated Academic Year"
     )
-    semester_number = models.PositiveIntegerField(help_text="Semester Number (e.g. 1, 2, 3, 4, 5, 6, 7, 8)")
+    semester_number = models.PositiveIntegerField(help_text="Semester Number (e.g. 1, 2, 3, 4)")
     name = models.CharField(max_length=50, help_text="Semester Display Name (e.g. Semester 1)")
     start_date = models.DateField()
     end_date = models.DateField()
@@ -121,6 +119,81 @@ class Semester(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         if self.is_current:
-            # Enforce single active current semester per academic year
             Semester.objects.filter(academic_year=self.academic_year, is_current=True).exclude(pk=self.pk).update(is_current=False)
+        super().save(*args, **kwargs)
+
+
+class StudentFee(models.Model):
+    """
+    Represents Student Fee Invoices & Payment Tracking.
+    """
+    FEE_TYPE_TUITION = 'TUITION'
+    FEE_TYPE_ADMISSION = 'ADMISSION'
+    FEE_TYPE_EXAM = 'EXAM'
+    FEE_TYPE_HOSTEL = 'HOSTEL'
+    FEE_TYPE_OTHER = 'OTHER'
+
+    FEE_TYPE_CHOICES = [
+        (FEE_TYPE_TUITION, 'Tuition Fee'),
+        (FEE_TYPE_ADMISSION, 'Admission Fee'),
+        (FEE_TYPE_EXAM, 'Examination Fee'),
+        (FEE_TYPE_HOSTEL, 'Hostel Fee'),
+        (FEE_TYPE_OTHER, 'Other / Miscellaneous'),
+    ]
+
+    STATUS_PAID = 'PAID'
+    STATUS_PARTIAL = 'PARTIAL'
+    STATUS_PENDING = 'PENDING'
+    STATUS_OVERDUE = 'OVERDUE'
+
+    STATUS_CHOICES = [
+        (STATUS_PAID, 'Paid'),
+        (STATUS_PARTIAL, 'Partially Paid'),
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_OVERDUE, 'Overdue'),
+    ]
+
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='fee_invoices',
+        help_text="Student account"
+    )
+    title = models.CharField(max_length=100, help_text="Invoice Title (e.g. Semester 1 Tuition Fee)")
+    fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default=FEE_TYPE_TUITION)
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True)
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Total fee amount")
+    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Amount paid so far")
+    due_date = models.DateField(help_text="Payment due date")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    payment_date = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'student_fees'
+        ordering = ['-due_date']
+
+    def __str__(self):
+        return f"{self.student.username} - {self.title} (₹{self.paid_amount}/₹{self.total_amount})"
+
+    @property
+    def remaining_due(self):
+        return self.total_amount - self.paid_amount
+
+    def update_status(self):
+        if self.paid_amount >= self.total_amount:
+            self.status = self.STATUS_PAID
+        elif self.paid_amount > 0:
+            self.status = self.STATUS_PARTIAL
+        elif self.due_date < date.today():
+            self.status = self.STATUS_OVERDUE
+        else:
+            self.status = self.STATUS_PENDING
+
+    def save(self, *args, **kwargs):
+        self.update_status()
         super().save(*args, **kwargs)
