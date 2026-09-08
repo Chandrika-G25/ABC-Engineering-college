@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile | Student Management System{% endblock %}
+
+{% block header_title %}Account Profile & Settings{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- Profile Banner Card -->
+    <div class="card" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem;">
+        <div class="user-avatar" style="width: 72px; height: 72px; font-size: 2rem;">
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="Profile" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+            {% else %}
+                {{ user.username|slice:":1"|upper }}
+            {% endif %}
+        </div>
+        <div>
+            <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-main);">
+                {{ user.get_full_name|default:user.username }}
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                <i class="fa-solid fa-envelope" style="margin-right: 4px;"></i> {{ user.email|default:"No email provided" }}
+            </p>
+            <span style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; background-color: var(--primary-light); color: var(--primary-color);">
+                Role: {{ user.get_role_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Personal Information Edit Form -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+            <i class="fa-solid fa-user-pen" style="color: var(--primary-color); margin-right: 6px;"></i> Edit Personal Details
+        </h3>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">First Name</label>
+                    {{ form.first_name }}
+                </div>
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Last Name</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Email Address</label>
+                    {{ form.email }}
+                </div>
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Phone Number</label>
+                    {{ form.phone }}
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Residential Address</label>
+                {{ form.address }}
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Profile Picture</label>
+                {{ form.profile_picture }}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Profile
+                </button>
+                <a href="{% url 'accounts:change_password' %}" class="btn btn-secondary">
+                    <i class="fa-solid fa-key"></i> Change Password
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

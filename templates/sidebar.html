@@ -12,6 +12,18 @@
                 <i class="fa-solid fa-chart-pie"></i> Dashboard
             </a>
         </li>
+        {% if user.is_authenticated %}
+            <li class="sidebar-item">
+                <a href="{% url 'accounts:profile' %}" class="sidebar-link">
+                    <i class="fa-solid fa-id-card"></i> My Profile
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{% url 'accounts:change_password' %}" class="sidebar-link">
+                    <i class="fa-solid fa-shield-halved"></i> Change Password
+                </a>
+            </li>
+        {% endif %}
         <li class="sidebar-item">
             <a href="#" class="sidebar-link">
                 <i class="fa-solid fa-building-columns"></i> Departments
@@ -45,7 +57,12 @@
     </ul>
 
     <div class="sidebar-footer">
-        <span style="font-size: 0.8rem; color: var(--text-muted);">
+        {% if user.is_authenticated %}
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.25rem;">
+                Logged in as: <strong style="color: #fff;">{{ user.username }}</strong>
+            </div>
+        {% endif %}
+        <span style="font-size: 0.75rem; color: var(--text-muted);">
             <i class="fa-solid fa-database" style="color: #10b981; margin-right: 4px;"></i> MySQL Connected
         </span>
     </div>

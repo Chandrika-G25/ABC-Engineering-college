@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | University Student Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            width: 100%;
+            max-width: 440px;
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .login-brand {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            color: #334155;
+        }
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 0.85rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-brand">
+                <i class="fa-solid fa-graduation-cap" style="color: #2563eb;"></i>
+                <span>UniPortal</span>
+            </div>
+            <p style="color: #64748b; font-size: 0.9rem;">Sign in to your university portal account</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div style="background-color: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; border: 1px solid {% if message.tags == 'error' %}#fca5a5{% else %}#86efac{% endif %}; color: {% if message.tags == 'error' %}#991b1b{% else %}#166534{% endif %}; padding: 0.75rem; border-radius: 8px; font-size: 0.875rem; margin-bottom: 1.25rem;">
+                    <i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}" style="margin-right: 4px;"></i> {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'accounts:login' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label" for="id_username">Username</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    {{ form.username }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_password">Password</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    {{ form.password }}
+                    <i class="fa-solid fa-eye toggle-password" id="togglePasswordBtn"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-submit">
+                <i class="fa-solid fa-right-to-bracket" style="margin-right: 6px;"></i> Sign In
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const passwordInput = document.getElementById('id_password');
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                toggleBtn.classList.toggle('fa-eye');
+                toggleBtn.classList.toggle('fa-eye-slash');
+            });
+        }
+    </script>
+</body>
+</html>

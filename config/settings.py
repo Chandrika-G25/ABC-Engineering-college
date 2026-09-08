@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Custom Apps
+    'accounts',
     'core',
 ]
 
@@ -83,6 +84,14 @@ DATABASES = {
         },
     }
 }
+
+# Custom User Model
+AUTH_USER_MODEL = 'accounts.User'
+
+# Auth URLs
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'core:home'
+LOGOUT_REDIRECT_URL = 'accounts:login'
 
 
 # Password validation
