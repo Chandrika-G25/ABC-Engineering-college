@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Management System{% endblock %}</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        {% include 'sidebar.html' %}
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <!-- Navbar Header -->
+            {% include 'navbar.html' %}
+
+            <!-- Django Alert Messages -->
+            {% if messages %}
+                <div style="padding: 1rem 2rem 0 2rem;">
+                    {% for message in messages %}
+                        <div class="card alert-auto-dismiss" style="background-color: {% if message.tags == 'error' %}#fef2f2{% else %}#f0fdf4{% endif %}; border-color: {% if message.tags == 'error' %}#fca5a5{% else %}#86efac{% endif %}; color: {% if message.tags == 'error' %}#991b1b{% else %}#166534{% endif %}; margin-bottom: 0.5rem; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                            <span><i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}" style="margin-right: 0.5rem;"></i> {{ message }}</span>
+                            <button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; color:inherit;"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Page Specific Content -->
+            <main class="content-body">
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- Footer -->
+            <footer class="app-footer">
+                &copy; {{ current_year|default:"2026" }} Student Management System &bull; University Portal Engine v1.0
+            </footer>
+        </div>
+    </div>
+
+    <!-- Main JS Script -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

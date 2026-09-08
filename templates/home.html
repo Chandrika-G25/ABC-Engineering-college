@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Student Management System{% endblock %}
+
+{% block header_title %}System Overview & Welcome{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
+        Welcome to Student Management System
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+        A high-performance full-stack web application powered by Django 5.x and MySQL Server.
+    </p>
+</div>
+
+<!-- Overview Quick Stats -->
+<div class="grid-stats">
+    <div class="card stat-card">
+        <div class="stat-icon">
+            <i class="fa-solid fa-user-graduate"></i>
+        </div>
+        <div>
+            <div class="stat-val">0</div>
+            <div class="stat-lbl">Enrolled Students</div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-icon" style="background-color: #f0fdf4; color: #10b981;">
+            <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
+        <div>
+            <div class="stat-val">0</div>
+            <div class="stat-lbl">Active Faculty</div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-icon" style="background-color: #fef3c7; color: #d97706;">
+            <i class="fa-solid fa-building-columns"></i>
+        </div>
+        <div>
+            <div class="stat-val">0</div>
+            <div class="stat-lbl">Departments</div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-icon" style="background-color: #f3e8ff; color: #9333ea;">
+            <i class="fa-solid fa-book-bookmark"></i>
+        </div>
+        <div>
+            <div class="stat-val">0</div>
+            <div class="stat-lbl">Offered Courses</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="card-title"><i class="fa-solid fa-circle-info" style="color: var(--primary-color); margin-right: 0.5rem;"></i> System Status & Database Verification</h3>
+    <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+        Stage 1 environment setup and database initialization is fully verified. Django engine is connected directly to MySQL database <code>student_management_db</code> running on localhost.
+    </p>
+    <div style="background-color: var(--bg-body); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-family: monospace; font-size: 0.875rem;">
+        <div><strong>Database Engine:</strong> django.db.backends.mysql (via PyMySQL)</div>
+        <div><strong>Connected DB:</strong> {{ db_name }}</div>
+        <div><strong>Server Status:</strong> <span style="color: var(--success-color); font-weight: bold;">● Active & Operational</span></div>
+    </div>
+</div>
+{% endblock %}
