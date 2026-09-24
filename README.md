@@ -3,31 +3,7 @@
 A **Student Management System** built with **Django** that provides a web interface for managing students, courses, and enrollments. This project demonstrates core CRUD operations, authentication, and integration with both **MySQL** and **SQLite** databases.
 
 ---
-
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Local Development Setup](#local-development-setup)
-  - [Clone the Repository](#clone-the-repository)
-  - [Environment Variables](#environment-variables)
-  - [Python Virtual Environment](#python-virtual-environment)
-  - [Install Dependencies](#install-dependencies)
-  - [Database Setup](#database-setup)
-  - [Apply Migrations](#apply-migrations)
-  - [Run the Development Server](#run-the-development-server)
-- [Testing](#testing)
-- [Deployment](#deployment)
-  - [Render.com (Free Tier)](#rendercom-free-tier)
-  - [Heroku (Deprecated – but still supported)](#heroku-deprecated)
-  - [Docker](#docker)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
-
----
+Live deploy Link:https://abc-engineering-college-1.onrender.com/
 
 ## Features
 
