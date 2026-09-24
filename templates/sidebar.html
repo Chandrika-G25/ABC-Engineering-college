@@ -2,7 +2,7 @@
     <div class="sidebar-header">
         <a href="/" class="sidebar-brand">
             <i class="fa-solid fa-graduation-cap" style="color: #60a5fa; font-size: 1.5rem;"></i>
-            <span>SMS</span> ERP
+            <span>ABC</span> Engineering
         </a>
     </div>
 
@@ -13,76 +13,45 @@
             </a>
         </li>
 
-        <!-- Core Operations -->
+        <!-- Main B.Tech Modules -->
         <li class="sidebar-item">
             <a href="{% url 'core:student_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-user-graduate"></i> Students
+                <i class="fa-solid fa-user-graduate"></i> Student Details
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{% url 'core:teacher_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-chalkboard-user"></i> Faculty Members
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{% url 'core:attendance_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-clipboard-user"></i> Attendance
+                <i class="fa-solid fa-clipboard-user"></i> Student Attendance
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{% url 'core:teacher_attendance_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-user-check"></i> Faculty Attendance
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{% url 'core:marks_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-square-poll-vertical"></i> Marks
+                <i class="fa-solid fa-square-poll-vertical"></i> Marks & Results
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{% url 'core:fee_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-file-invoice-dollar"></i> Fees
+                <i class="fa-solid fa-file-invoice-dollar"></i> Fee Collection
             </a>
         </li>
 
-        <!-- Academic Structure -->
-        <li class="sidebar-item">
-            <a href="{% url 'core:teacher_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-chalkboard-user"></i> Teachers
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{% url 'core:subject_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-book-open"></i> Subjects
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{% url 'core:department_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-building-columns"></i> Departments
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{% url 'core:course_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-book-bookmark"></i> Courses
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{% url 'core:academic_year_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-calendar-days"></i> Academic Years
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{% url 'core:semester_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-layer-group"></i> Semesters
-            </a>
-        </li>
-
-        <!-- System Analytics & Reports -->
-        <li class="sidebar-item">
-            <a href="{% url 'core:reports' %}" class="sidebar-link">
-                <i class="fa-solid fa-chart-line"></i> Reports
-            </a>
-        </li>
     </ul>
 
     <div class="sidebar-footer">
         {% if user.is_authenticated %}
-            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.25rem;">
+            <div style="font-size: 0.8rem; color: #94a3b8;">
                 Logged in as: <strong style="color: #fff;">{{ user.username }}</strong>
             </div>
         {% endif %}
-        <span style="font-size: 0.75rem; color: var(--text-muted);">
-            <i class="fa-solid fa-database" style="color: #10b981; margin-right: 4px;"></i> MySQL Connected
-        </span>
     </div>
 </aside>

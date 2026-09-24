@@ -12,7 +12,7 @@
         </h3>
 
         <div style="background-color: var(--bg-body); padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.9rem; border: 1px solid var(--border-color);">
-            <div><strong>Student:</strong> {{ fee.student.get_full_name|default:fee.student.username }}</div>
+            <div><strong>Student:</strong> {{ fee.student.full_name }} ({{ fee.student.student_id }})</div>
             <div><strong>Invoice:</strong> {{ fee.title }}</div>
             <div><strong>Total Fee Billed:</strong> ₹{{ fee.total_amount }}</div>
             <div><strong>Amount Already Paid:</strong> ₹{{ fee.paid_amount }}</div>
@@ -24,9 +24,16 @@
         <form method="POST">
             {% csrf_token %}
 
-            <div style="margin-bottom: 1.5rem;">
+            <div style="margin-bottom: 1.25rem;">
                 <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Payment Amount (₹) *</label>
                 {{ form.payment_amount }}
+                {% if form.payment_amount.errors %}<div style="color:red; font-size:0.8rem;">{{ form.payment_amount.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem;">Payment Method *</label>
+                {{ form.payment_method }}
+                {% if form.payment_method.errors %}<div style="color:red; font-size:0.8rem;">{{ form.payment_method.errors.0 }}</div>{% endif %}
             </div>
 
             <div style="display: flex; gap: 1rem;">

@@ -1,0 +1,466 @@
+<!-- Record Examination Marks Modal Dialog -->
+<div id="recordMarksModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; overflow-y: auto;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 720px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1.5px solid #bfdbfe; overflow: hidden; margin: auto; animation: modalFadeIn 0.2s ease-out;">
+        
+        <!-- Modal Header -->
+        <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-file-pen"></i> Record Examination Marks
+                </h3>
+                <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #dbeafe;">
+                    Select stream, academic year, student, semester, and curriculum subjects.
+                </p>
+            </div>
+            <button type="button" onclick="closeRecordMarksModal()" style="background: rgba(255,255,255,0.2); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
+        </div>
+
+        <!-- Modal Form -->
+        <form method="POST" id="recordMarksForm" style="padding: 1.5rem;" onsubmit="return validateMarksSubmission()">
+            {% csrf_token %}
+            <input type="hidden" name="record_marks" value="1">
+            <input type="hidden" name="student" id="modalStudentId" required>
+
+            <!-- 1. STREAM & 2. ACADEMIC YEAR -->
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem; margin-bottom: 1.15rem;">
+                <!-- 1. Stream Dropdown -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        1. Stream <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select id="modalStreamSelect" onchange="onStreamChange(this.value)" 
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 800; font-size: 0.875rem; color: #d97706; background: #ffffff;" required>
+                        <option value="ECE">ECE (Electronics & Communication)</option>
+                        <option value="CSE">CSE (Computer Science)</option>
+                        <option value="IT">IT (Information Technology)</option>
+                        <option value="EEE">EEE (Electrical & Electronics)</option>
+                        <option value="CIVIL">CIVIL (Civil Engineering)</option>
+                        <option value="AIDS">AIDS (AI & Data Science)</option>
+                    </select>
+                </div>
+
+                <!-- 2. Academic Year Dropdown (Roman numerals) -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        2. Academic Year <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select id="modalYearSelect" onchange="onYearChange(this.value)" 
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 800; font-size: 0.875rem; color: #7c3aed; background: #ffffff;" required>
+                        <option value="I">Year I</option>
+                        <option value="II">Year II</option>
+                        <option value="III">Year III</option>
+                        <option value="IV">Year IV</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 3. STUDENT ROLL NUMBER & 4. STUDENT NAME -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.15rem;">
+                <!-- 3. Student Roll Number Dropdown (Filtered by Stream & Year) -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        3. Student Roll Number <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select name="student_roll_select" id="modalRollNoSelect" onchange="onRollNoPicked(this.value)" 
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-family: monospace; font-weight: 800; font-size: 0.875rem; color: #1d4ed8; background: #ffffff;" required>
+                        <option value="">-- Select Roll Number --</option>
+                    </select>
+                </div>
+
+                <!-- 4. Student Name Dropdown (Filtered by Stream & Year) -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        4. Student Name <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select name="student_name_select" id="modalNameSelect" onchange="onNamePicked(this.value)" 
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 700; font-size: 0.875rem; color: #0f172a; background: #ffffff;" required>
+                        <option value="">-- Select Student Name --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 5. SEMESTER (ROMAN NUMERALS ONLY) -->
+            <div style="margin-bottom: 1.15rem;">
+                <label style="display: block; font-weight: 800; font-size: 0.85rem; color: #86198f; margin-bottom: 0.35rem;">
+                    5. Semester (Roman Numerals) <span style="color: #dc2626;">*</span>
+                </label>
+                <select name="semester" id="modalSemesterSelect" onchange="onSemesterChange(this.value)" 
+                        style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #f0abfc; font-weight: 800; color: #86198f; font-size: 0.9rem; background: #ffffff;" required>
+                    <option value="">-- Select Semester --</option>
+                </select>
+            </div>
+
+            <!-- 6. SUBJECT CODE & 7. SUBJECT NAME -->
+            <div style="display: grid; grid-template-columns: 1fr 1.8fr; gap: 1rem; margin-bottom: 1.15rem;">
+                <!-- 6. Subject Code Dropdown -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        6. Subject Code <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select name="subject_code" id="modalSubjectCodeSelect" onchange="onSubjectCodePicked(this.value)"
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-family: monospace; font-weight: 800; font-size: 0.875rem; color: #1e40af; background: #ffffff;" required>
+                        <option value="">-- Select Subject Code --</option>
+                    </select>
+                </div>
+
+                <!-- 7. Subject Name Dropdown -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        7. Subject Name <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select name="subject" id="modalSubjectNameSelect" onchange="onSubjectNamePicked(this.value)"
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 700; font-size: 0.875rem; color: #0f172a; background: #ffffff;" required>
+                        <option value="">-- Select Subject Name --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 8. MARKS OBTAINED & 9. TOTAL MARKS -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; background: #f0fdf4; padding: 1rem; border-radius: 10px; border: 1.5px solid #bbf7d0;">
+                <div>
+                    <label style="display:block; font-weight:800; font-size:0.85rem; color:#166534; margin-bottom:0.35rem;">
+                        8. Marks Obtained <span style="color: #dc2626;">*</span>
+                    </label>
+                    <input type="number" step="0.5" min="0" max="100" name="marks_obtained" id="modalMarksObtainedInput" placeholder="e.g. 85.0" required
+                           style="width: 100%; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1.5px solid #86efac; font-weight: 800; font-size: 1rem; color: #14532d; background: #ffffff;">
+                    <span style="font-size: 0.725rem; color: #15803d; font-weight: 600;">Minimum pass score: &ge; 40.0</span>
+                </div>
+                <div>
+                    <label style="display:block; font-weight:800; font-size:0.85rem; color:#166534; margin-bottom:0.35rem;">
+                        9. Total Marks (Dropdown) <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select name="total_marks" id="modalTotalMarksSelect" required
+                            style="width: 100%; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1.5px solid #86efac; font-weight: 800; font-size: 0.95rem; color: #14532d; background: #ffffff;">
+                        <option value="100.00" selected>100.00 Max Marks (Standard)</option>
+                        <option value="50.00">50.00 Max Marks</option>
+                        <option value="75.00">75.00 Max Marks</option>
+                        <option value="25.00">25.00 Max Marks</option>
+                    </select>
+                    <span style="font-size: 0.725rem; color: #15803d; font-weight: 600;">Standard B.Tech semester max score is 100</span>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" onclick="closeRecordMarksModal()" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-weight: 600;">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.75rem; font-weight: 800; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Examination Marks
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+</style>
+
+<script>
+    // Load student & curriculum data from context
+    const allStudentsData = {{ students_json|safe }};
+    const curriculumData = {{ curriculum_json|safe }};
+
+    // Primary & Allowed Semesters strictly mapped to Academic Year
+    const YEAR_SEMESTERS_CONFIG = {
+        'I': {
+            primary: ['Sem I', 'Sem II'],
+            backlogs: [],
+            defaultSem: 'Sem I'
+        },
+        'II': {
+            primary: ['Sem III', 'Sem IV'],
+            backlogs: ['Sem I', 'Sem II'],
+            defaultSem: 'Sem III'
+        },
+        'III': {
+            primary: ['Sem V', 'Sem VI'],
+            backlogs: ['Sem I', 'Sem II', 'Sem III', 'Sem IV'],
+            defaultSem: 'Sem V'
+        },
+        'IV': {
+            primary: ['Sem VII', 'Sem VIII'],
+            backlogs: ['Sem I', 'Sem II', 'Sem III', 'Sem IV', 'Sem V', 'Sem VI'],
+            defaultSem: 'Sem VII'
+        }
+    };
+
+    function openRecordMarksModal(preselectedStudentId = null) {
+        const modal = document.getElementById('recordMarksModal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+
+        if (preselectedStudentId) {
+            const student = allStudentsData.find(s => String(s.id) === String(preselectedStudentId));
+            if (student) {
+                const streamSelect = document.getElementById('modalStreamSelect');
+                const yearSelect = document.getElementById('modalYearSelect');
+                if (streamSelect) streamSelect.value = student.stream || 'ECE';
+                if (yearSelect) yearSelect.value = student.year || 'I';
+                updateStudentsDropdowns(student.id);
+                updateSemesterDropdown(student.year || 'I');
+                updateSubjectDropdowns();
+                return;
+            }
+        }
+
+        // Get currently selected stream and year from dropdowns
+        const streamSelect = document.getElementById('modalStreamSelect');
+        const yearSelect = document.getElementById('modalYearSelect');
+
+        // Check if page has active filters
+        const activeStreamMeta = document.querySelector('[data-active-stream]');
+        if (activeStreamMeta && activeStreamMeta.getAttribute('data-active-stream') && streamSelect) {
+            streamSelect.value = activeStreamMeta.getAttribute('data-active-stream');
+        }
+        const activeYearMeta = document.querySelector('[data-active-year]');
+        if (activeYearMeta && activeYearMeta.getAttribute('data-active-year') && yearSelect) {
+            yearSelect.value = activeYearMeta.getAttribute('data-active-year');
+        }
+
+        updateStudentsDropdowns();
+        updateSemesterDropdown(yearSelect ? yearSelect.value : 'I');
+        updateSubjectDropdowns();
+    }
+
+    function closeRecordMarksModal() {
+        const modal = document.getElementById('recordMarksModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Close on background click
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('recordMarksModal');
+        if (event.target === modal) {
+            closeRecordMarksModal();
+        }
+    });
+
+    // 1. When Stream Changes
+    function onStreamChange(streamCode) {
+        updateStudentsDropdowns();
+        updateSubjectDropdowns();
+    }
+
+    // 2. When Academic Year Changes
+    function onYearChange(yearCode) {
+        updateStudentsDropdowns();
+        updateSemesterDropdown(yearCode);
+        updateSubjectDropdowns();
+    }
+
+    // Update Roll Number & Student Name dropdowns according to chosen Stream & Year
+    function updateStudentsDropdowns(selectedStudentId = null) {
+        const streamSelect = document.getElementById('modalStreamSelect');
+        const yearSelect = document.getElementById('modalYearSelect');
+        const rollSelect = document.getElementById('modalRollNoSelect');
+        const nameSelect = document.getElementById('modalNameSelect');
+        const studentIdHidden = document.getElementById('modalStudentId');
+
+        if (!rollSelect || !nameSelect || !streamSelect || !yearSelect) return;
+
+        const stream = streamSelect.value;
+        const year = yearSelect.value;
+
+        // Filter students strictly matching Stream and Year
+        const filtered = allStudentsData.filter(s => 
+            (s.stream || '').toUpperCase() === (stream || '').toUpperCase() &&
+            (s.year || '').toUpperCase() === (year || '').toUpperCase()
+        );
+
+        rollSelect.innerHTML = '<option value="">-- Select Roll Number --</option>';
+        nameSelect.innerHTML = '<option value="">-- Select Student Name --</option>';
+
+        if (filtered.length === 0) {
+            rollSelect.innerHTML = `<option value="">No active students in ${stream} Year ${year}</option>`;
+            nameSelect.innerHTML = `<option value="">No active students in ${stream} Year ${year}</option>`;
+            studentIdHidden.value = '';
+            return;
+        }
+
+        filtered.forEach(s => {
+            // Roll No option
+            const optRoll = document.createElement('option');
+            optRoll.value = s.id;
+            optRoll.textContent = `${s.roll_no} (${s.full_name})`;
+            rollSelect.appendChild(optRoll);
+
+            // Name option
+            const optName = document.createElement('option');
+            optName.value = s.id;
+            optName.textContent = `${s.full_name} - ${s.roll_no}`;
+            nameSelect.appendChild(optName);
+        });
+
+        // If a specific student ID was passed and exists in filtered, select it
+        if (selectedStudentId && filtered.some(s => String(s.id) === String(selectedStudentId))) {
+            rollSelect.value = selectedStudentId;
+            nameSelect.value = selectedStudentId;
+            studentIdHidden.value = selectedStudentId;
+        } else {
+            // Auto-select the first student from the filtered list
+            rollSelect.value = filtered[0].id;
+            nameSelect.value = filtered[0].id;
+            studentIdHidden.value = filtered[0].id;
+        }
+    }
+
+    // 3. When Roll Number is Picked
+    function onRollNoPicked(studentId) {
+        const studentIdHidden = document.getElementById('modalStudentId');
+        const nameSelect = document.getElementById('modalNameSelect');
+        studentIdHidden.value = studentId;
+        if (nameSelect) {
+            nameSelect.value = studentId;
+        }
+    }
+
+    // 4. When Student Name is Picked
+    function onNamePicked(studentId) {
+        const studentIdHidden = document.getElementById('modalStudentId');
+        const rollSelect = document.getElementById('modalRollNoSelect');
+        studentIdHidden.value = studentId;
+        if (rollSelect) {
+            rollSelect.value = studentId;
+        }
+    }
+
+    // 5. Populate Semester Dropdown based on Year
+    function updateSemesterDropdown(yearCode) {
+        const semSelect = document.getElementById('modalSemesterSelect');
+        if (!semSelect) return;
+
+        const config = YEAR_SEMESTERS_CONFIG[yearCode] || YEAR_SEMESTERS_CONFIG['I'];
+        semSelect.innerHTML = '';
+
+        // Primary Year Semesters group
+        const primaryGroup = document.createElement('optgroup');
+        primaryGroup.label = `Year ${yearCode} Semesters`;
+        config.primary.forEach(sem => {
+            const opt = document.createElement('option');
+            opt.value = sem;
+            opt.textContent = `${sem}`;
+            primaryGroup.appendChild(opt);
+        });
+        semSelect.appendChild(primaryGroup);
+
+        // Previous Semesters (Backlogs) group if any
+        if (config.backlogs && config.backlogs.length > 0) {
+            const backlogGroup = document.createElement('optgroup');
+            backlogGroup.label = `Previous Semesters (Backlogs)`;
+            config.backlogs.forEach(sem => {
+                const opt = document.createElement('option');
+                opt.value = sem;
+                opt.textContent = `${sem}`;
+                backlogGroup.appendChild(opt);
+            });
+            semSelect.appendChild(backlogGroup);
+        }
+
+        // Set default primary semester
+        semSelect.value = config.defaultSem;
+    }
+
+    // 5. When Semester Changes
+    function onSemesterChange(semesterCode) {
+        updateSubjectDropdowns();
+    }
+
+    // 6 & 7. Update Subject Code & Subject Name dropdowns
+    function updateSubjectDropdowns() {
+        const streamSelect = document.getElementById('modalStreamSelect');
+        const semSelect = document.getElementById('modalSemesterSelect');
+        const codeSelect = document.getElementById('modalSubjectCodeSelect');
+        const nameSelect = document.getElementById('modalSubjectNameSelect');
+
+        if (!codeSelect || !nameSelect || !streamSelect || !semSelect) return;
+
+        const stream = streamSelect.value || 'ECE';
+        const semester = semSelect.value || 'Sem I';
+
+        codeSelect.innerHTML = '<option value="">-- Select Subject Code --</option>';
+        nameSelect.innerHTML = '<option value="">-- Select Subject Name --</option>';
+
+        if (curriculumData && curriculumData[stream] && curriculumData[stream][semester]) {
+            const subjects = curriculumData[stream][semester];
+            subjects.forEach(sub => {
+                // Code option
+                const optCode = document.createElement('option');
+                optCode.value = sub.code;
+                optCode.textContent = `${sub.code} (${sub.credits} C)`;
+                codeSelect.appendChild(optCode);
+
+                // Name option
+                const optName = document.createElement('option');
+                optName.value = sub.name;
+                optName.setAttribute('data-code', sub.code);
+                optName.textContent = `${sub.name} [${sub.code}]`;
+                nameSelect.appendChild(optName);
+            });
+
+            // Preselect first subject automatically
+            if (subjects.length > 0) {
+                codeSelect.value = subjects[0].code;
+                nameSelect.value = subjects[0].name;
+            }
+        }
+    }
+
+    // 6. When Subject Code is Picked
+    function onSubjectCodePicked(subCode) {
+        const subNameSelect = document.getElementById('modalSubjectNameSelect');
+        if (!subNameSelect) return;
+        for (let i = 0; i < subNameSelect.options.length; i++) {
+            const opt = subNameSelect.options[i];
+            if (opt.getAttribute('data-code') === subCode) {
+                subNameSelect.selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    // 7. When Subject Name is Picked
+    function onSubjectNamePicked(subName) {
+        const subCodeSelect = document.getElementById('modalSubjectCodeSelect');
+        const subNameSelect = document.getElementById('modalSubjectNameSelect');
+        if (!subCodeSelect || !subNameSelect) return;
+
+        const selectedOption = subNameSelect.options[subNameSelect.selectedIndex];
+        if (selectedOption) {
+            const code = selectedOption.getAttribute('data-code');
+            if (code) subCodeSelect.value = code;
+        }
+    }
+
+    function validateMarksSubmission() {
+        const studentId = document.getElementById('modalStudentId').value;
+        const semester = document.getElementById('modalSemesterSelect').value;
+        const subCode = document.getElementById('modalSubjectCodeSelect').value;
+        const subName = document.getElementById('modalSubjectNameSelect').value;
+        const marks = document.getElementById('modalMarksObtainedInput').value;
+
+        if (!studentId) {
+            alert('Please select a student roll number.');
+            return false;
+        }
+        if (!semester) {
+            alert('Please select a Roman numeral semester.');
+            return false;
+        }
+        if (!subCode || !subName) {
+            alert('Please select a valid subject code and name.');
+            return false;
+        }
+        if (marks === '') {
+            alert('Please enter marks obtained.');
+            return false;
+        }
+        return true;
+    }
+</script>

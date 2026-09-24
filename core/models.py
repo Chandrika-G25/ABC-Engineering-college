@@ -2,13 +2,14 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from datetime import date
+from decimal import Decimal
 
 class Department(models.Model):
     """
-    Represents an Academic Department (e.g. Computer Science, Mechanical).
+    Represents an Academic Department / Engineering Stream.
     """
-    code = models.CharField(max_length=20, unique=True, help_text="Unique Department Code (e.g., CSE, ECE)")
-    name = models.CharField(max_length=100, help_text="Full Department Name")
+    code = models.CharField(max_length=20, unique=True, help_text="Stream Code (e.g. ECE, CSE, IT, EEE, CIVIL, AIDS)")
+    name = models.CharField(max_length=100, help_text="Department / Stream Name")
     head_of_department = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -33,15 +34,15 @@ class Department(models.Model):
 
 class Course(models.Model):
     """
-    Represents an Academic Degree Program / Course (e.g. B.Tech CSE, BCA, MCA).
+    Represents a B.Tech Engineering Degree Course Program.
     """
-    code = models.CharField(max_length=20, unique=True, help_text="Unique Course Code (e.g., BTECH-CSE)")
+    code = models.CharField(max_length=20, unique=True, help_text="Course Code (e.g. BTECH-ECE)")
     name = models.CharField(max_length=100, help_text="Full Course Degree Name")
     department = models.ForeignKey(
         Department,
         on_delete=models.CASCADE,
         related_name='courses',
-        help_text="Offering Academic Department"
+        help_text="Associated Engineering Stream"
     )
     duration_years = models.PositiveIntegerField(default=4)
     description = models.TextField(blank=True, null=True)
@@ -58,10 +59,7 @@ class Course(models.Model):
 
 
 class AcademicYear(models.Model):
-    """
-    Represents an Academic Year (e.g. 2026-2027).
-    """
-    name = models.CharField(max_length=20, unique=True, help_text="Academic Year Label (e.g. 2026-2027)")
+    name = models.CharField(max_length=20, unique=True, help_text="Academic Year (e.g. 2026-2027)")
     start_date = models.DateField()
     end_date = models.DateField()
     is_current = models.BooleanField(default=False)
@@ -87,14 +85,7 @@ class AcademicYear(models.Model):
 
 
 class Semester(models.Model):
-    """
-    Represents a Semester within an Academic Year (e.g. Semester 1, Semester 2).
-    """
-    academic_year = models.ForeignKey(
-        AcademicYear,
-        on_delete=models.CASCADE,
-        related_name='semesters'
-    )
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='semesters')
     semester_number = models.PositiveIntegerField()
     name = models.CharField(max_length=50)
     start_date = models.DateField()
@@ -111,32 +102,14 @@ class Semester(models.Model):
     def __str__(self):
         return f"{self.academic_year.name} - {self.name}"
 
-    def clean(self):
-        if self.start_date and self.end_date and self.start_date >= self.end_date:
-            raise ValidationError({'end_date': 'Semester end date must be strictly after start date.'})
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        if self.is_current:
-            Semester.objects.filter(academic_year=self.academic_year, is_current=True).exclude(pk=self.pk).update(is_current=False)
-        super().save(*args, **kwargs)
-
 
 class TeacherProfile(models.Model):
-    """
-    Represents a Faculty Teacher profile.
-    """
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='teacher_profile',
-        null=True, blank=True
-    )
-    teacher_id = models.CharField(max_length=50, unique=True, help_text="Unique Teacher ID")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='teacher_profile', null=True, blank=True)
+    teacher_id = models.CharField(max_length=50, unique=True, help_text="Unique Faculty ID (e.g. T101)")
     full_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='teachers')
     designation = models.CharField(max_length=100, default='Assistant Professor')
     joining_date = models.DateField(default=date.today)
     status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
@@ -149,21 +122,21 @@ class TeacherProfile(models.Model):
         ordering = ['full_name']
 
     def __str__(self):
-        return f"{self.full_name} ({self.teacher_id})"
+        dept_str = f" - {self.department.code}" if self.department else ""
+        return f"{self.full_name} ({self.teacher_id}{dept_str})"
 
 
 class StudentProfile(models.Model):
-    """
-    Represents a Student profile containing personal, contact, and academic details.
-    """
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='student_profile',
-        null=True, blank=True
-    )
-    student_id = models.CharField(max_length=50, unique=True, help_text="Roll No / Student ID (e.g. 22691A2843)")
-    admission_number = models.CharField(max_length=50, unique=True, help_text="Admission Serial Number")
+    YEAR_CHOICES = [
+        ('I', 'I Year'),
+        ('II', 'II Year'),
+        ('III', 'III Year'),
+        ('IV', 'IV Year'),
+    ]
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='student_profile', null=True, blank=True)
+    student_id = models.CharField(max_length=50, unique=True, help_text="Roll No (e.g. ECE: 22691A0401, CSE: 22691A0501)")
+    admission_number = models.CharField(max_length=50, unique=True, blank=True, null=True, help_text="Admission Serial Number")
     full_name = models.CharField(max_length=150)
     dob = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], null=True, blank=True)
@@ -173,11 +146,17 @@ class StudentProfile(models.Model):
     guardian_name = models.CharField(max_length=100, blank=True, null=True)
     guardian_phone = models.CharField(max_length=20, blank=True, null=True)
     
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.SET_NULL, null=True, blank=True)
+    year = models.CharField(max_length=10, choices=YEAR_CHOICES, default='I', help_text="B.Tech Academic Year (I, II, III, IV)")
     admission_date = models.DateField(default=date.today)
     status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive'), ('Graduated', 'Graduated'), ('Suspended', 'Suspended')], default='Active')
+
+    def save(self, *args, **kwargs):
+        if not self.admission_number and self.student_id:
+            self.admission_number = f"ADM-{self.student_id}"
+        super().save(*args, **kwargs)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -187,14 +166,13 @@ class StudentProfile(models.Model):
         ordering = ['student_id']
 
     def __str__(self):
-        return f"{self.full_name} ({self.student_id})"
+        dept_str = f" - {self.department.code}" if self.department else ""
+        year_display = self.get_year_display() if hasattr(self, 'get_year_display') else f"{self.year} Year"
+        return f"{self.full_name} ({self.student_id}{dept_str} | {year_display})"
 
 
 class Subject(models.Model):
-    """
-    Represents an Academic Subject (Theory, Practical, Elective).
-    """
-    code = models.CharField(max_length=20, unique=True, help_text="Subject Code (e.g. CS101)")
+    code = models.CharField(max_length=20, unique=True, help_text="Subject Code")
     name = models.CharField(max_length=100, help_text="Subject Name")
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='subjects')
     semester = models.ForeignKey(Semester, on_delete=models.SET_NULL, null=True, blank=True)
@@ -214,9 +192,6 @@ class Subject(models.Model):
 
 
 class Attendance(models.Model):
-    """
-    Represents Daily Student Attendance Records.
-    """
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='attendance_records')
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True)
     attendance_date = models.DateField(default=date.today)
@@ -233,13 +208,39 @@ class Attendance(models.Model):
         return f"{self.student.student_id} - {self.attendance_date} ({self.status})"
 
 
+class TeacherAttendance(models.Model):
+    teacher = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='attendance_records')
+    attendance_date = models.DateField(default=date.today)
+    status = models.CharField(max_length=15, choices=[('Present', 'Present'), ('Absent', 'Absent'), ('On Leave', 'On Leave')], default='Present')
+    recorded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'teacher_attendance'
+        ordering = ['-attendance_date']
+
+    def __str__(self):
+        return f"{self.teacher.teacher_id} - {self.attendance_date} ({self.status})"
+
+
 class ExamMark(models.Model):
-    """
-    Represents Examination Marks Records.
-    """
+    SEMESTER_CHOICES = [
+        ('Sem I', 'Sem I'),
+        ('Sem II', 'Sem II'),
+        ('Sem III', 'Sem III'),
+        ('Sem IV', 'Sem IV'),
+        ('Sem V', 'Sem V'),
+        ('Sem VI', 'Sem VI'),
+        ('Sem VII', 'Sem VII'),
+        ('Sem VIII', 'Sem VIII'),
+    ]
+
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='exam_marks')
-    exam_name = models.CharField(max_length=100, help_text="e.g. Mid-term, Final Exam")
+    semester = models.CharField(max_length=20, default='Sem I', choices=SEMESTER_CHOICES, help_text="Semester (e.g. Sem I, Sem II)")
+    exam_name = models.CharField(max_length=100, default='End Semester Examination', help_text="e.g. Mid-term, End Semester Examination")
     subject = models.CharField(max_length=100, help_text="Subject Name")
+    subject_code = models.CharField(max_length=20, blank=True, null=True, help_text="Subject Code e.g. EC101")
     marks_obtained = models.DecimalField(max_digits=5, decimal_places=2)
     total_marks = models.DecimalField(max_digits=5, decimal_places=2, default=100.00)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -249,13 +250,21 @@ class ExamMark(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.student.student_id} - {self.exam_name} ({self.marks_obtained}/{self.total_marks})"
+        return f"{self.student.student_id} - {self.subject} ({self.semester}): {self.marks_obtained}/{self.total_marks}"
 
     @property
     def percentage(self):
         if self.total_marks > 0:
-            return round((self.marks_obtained / self.total_marks) * 100, 2)
+            return round((float(self.marks_obtained) / float(self.total_marks)) * 100, 2)
         return 0.00
+
+    @property
+    def is_passed(self):
+        return self.percentage >= 40.0
+
+    @property
+    def status(self):
+        return 'PASS' if self.is_passed else 'FAIL'
 
     @property
     def grade(self):
@@ -265,13 +274,11 @@ class ExamMark(models.Model):
         if p >= 70: return 'B'
         if p >= 60: return 'C'
         if p >= 50: return 'D'
+        if p >= 40: return 'P'
         return 'F'
 
 
 class StudentFee(models.Model):
-    """
-    Represents Student Fee Invoices & Payment Tracking.
-    """
     FEE_TYPE_TUITION = 'TUITION'
     FEE_TYPE_ADMISSION = 'ADMISSION'
     FEE_TYPE_EXAM = 'EXAM'
@@ -298,24 +305,16 @@ class StudentFee(models.Model):
         (STATUS_OVERDUE, 'Overdue'),
     ]
 
-    student = models.ForeignKey(
-        StudentProfile,
-        on_delete=models.CASCADE,
-        related_name='fee_invoices',
-        null=True, blank=True
-    )
-    user_account = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        null=True, blank=True
-    )
-    title = models.CharField(max_length=100, help_text="Invoice Title (e.g. Semester 1 Tuition Fee)")
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='fee_invoices', null=True, blank=True)
+    user_account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=100, help_text="Invoice Title (e.g. Semester 1 B.Tech Tuition Fee)")
     fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default=FEE_TYPE_TUITION)
     course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True)
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.SET_NULL, null=True, blank=True)
+    semester = models.CharField(max_length=20, default='Sem I', choices=ExamMark.SEMESTER_CHOICES, help_text="Semester (e.g. Sem I, Sem II)")
     
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('70000.00'), help_text="Standard B.Tech Fee (₹70,000)")
+    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     payment_method = models.CharField(max_length=50, default='Online / UPI')
     due_date = models.DateField(default=date.today)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)

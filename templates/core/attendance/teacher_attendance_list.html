@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Attendance | B.Tech SMS ERP{% endblock %}
+
+{% block header_title %}Faculty Teacher Attendance{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%); border: 1.5px solid #99f6e4; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.06);">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; border-bottom: 2px solid #ccfbf1; padding-bottom: 1rem;">
+        <div>
+            <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f766e; margin: 0; display: flex; align-items: center; gap: 10px;">
+                <span style="background: #0d9488; color: #ffffff; width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 3px 8px rgba(13, 148, 136, 0.3);">
+                    <i class="fa-solid fa-clipboard-user"></i>
+                </span>
+                Faculty Attendance Management
+            </h1>
+            <p style="color: #475569; font-size: 0.9rem; margin-top: 6px; margin-bottom: 0;">
+                Select stream (<strong>ECE</strong>, <strong>CSE</strong>, <strong>IT</strong>, <strong>EEE</strong>, <strong>CIVIL</strong>, <strong>AIDS</strong>) to view faculty and mark attendance instantly with 1-click.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <span style="font-size: 0.85rem; font-weight: 800; color: #0f766e; background: #ccfbf1; padding: 0.55rem 1rem; border-radius: 10px; border: 1.5px solid #5eead4; box-shadow: 0 2px 5px rgba(20, 184, 166, 0.15);">
+                <i class="fa-regular fa-calendar-check" style="color: #0d9488; margin-right: 6px;"></i>
+                Today: <strong>{{ today_date|date:"l, d M Y" }}</strong>
+            </span>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STREAM SELECTOR TABS WITH BRAND COLORS -->
+    <!-- ========================================== -->
+    <div style="background: #ffffff; border: 1.5px solid #ccfbf1; border-radius: 14px; padding: 1.1rem 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+        <div style="font-size: 0.825rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #0f766e; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-layer-group" style="color: #0d9488;"></i>
+            Select Engineering Stream / Department Faculty:
+        </div>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;">
+            <!-- ECE -->
+            <a href="?stream=ECE"
+               style="padding: 0.55rem 1.15rem; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+               {% if selected_stream == 'ECE' %}
+                   background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #ffffff; border: 1.5px solid #d97706; box-shadow: 0 4px 10px rgba(217,119,6,0.3);
+               {% else %}
+                   background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a;
+               {% endif %}">
+                <i class="fa-solid fa-microchip"></i>
+                <span>ECE Faculty</span>
+                <span style="font-size: 0.725rem; padding: 1px 7px; border-radius: 12px; font-weight: 800;
+                    {% if selected_stream == 'ECE' %}background: rgba(255,255,255,0.3); color: #ffffff;{% else %}background: #fef3c7; color: #92400e; border: 1px solid #fde68a;{% endif %}">
+                    {% for tab in stream_tabs %}{% if tab.code == 'ECE' %}{{ tab.count }}{% endif %}{% endfor %}
+                </span>
+            </a>
+
+            <!-- CSE -->
+            <a href="?stream=CSE"
+               style="padding: 0.55rem 1.15rem; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+               {% if selected_stream == 'CSE' %}
+                   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; border: 1.5px solid #2563eb; box-shadow: 0 4px 10px rgba(37,99,235,0.3);
+               {% else %}
+                   background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe;
+               {% endif %}">
+                <i class="fa-solid fa-laptop-code"></i>
+                <span>CSE Faculty</span>
+                <span style="font-size: 0.725rem; padding: 1px 7px; border-radius: 12px; font-weight: 800;
+                    {% if selected_stream == 'CSE' %}background: rgba(255,255,255,0.3); color: #ffffff;{% else %}background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;{% endif %}">
+                    {% for tab in stream_tabs %}{% if tab.code == 'CSE' %}{{ tab.count }}{% endif %}{% endfor %}
+                </span>
+            </a>
+
+            <!-- IT -->
+            <a href="?stream=IT"
+               style="padding: 0.55rem 1.15rem; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+               {% if selected_stream == 'IT' %}
+                   background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border: 1.5px solid #059669; box-shadow: 0 4px 10px rgba(5,150,105,0.3);
+               {% else %}
+                   background: #ecfdf5; color: #065f46; border: 1.5px solid #a7f3d0;
+               {% endif %}">
+                <i class="fa-solid fa-network-wired"></i>
+                <span>IT Faculty</span>
+                <span style="font-size: 0.725rem; padding: 1px 7px; border-radius: 12px; font-weight: 800;
+                    {% if selected_stream == 'IT' %}background: rgba(255,255,255,0.3); color: #ffffff;{% else %}background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;{% endif %}">
+                    {% for tab in stream_tabs %}{% if tab.code == 'IT' %}{{ tab.count }}{% endif %}{% endfor %}
+                </span>
+            </a>
+
+            <!-- EEE -->
+            <a href="?stream=EEE"
+               style="padding: 0.55rem 1.15rem; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+               {% if selected_stream == 'EEE' %}
+                   background: linear-gradient(135deg, #c026d3 0%, #9333ea 100%); color: #ffffff; border: 1.5px solid #c026d3; box-shadow: 0 4px 10px rgba(192,38,211,0.3);
+               {% else %}
+                   background: #fdf4ff; color: #86198f; border: 1.5px solid #f5d0fe;
+               {% endif %}">
+                <i class="fa-solid fa-bolt"></i>
+                <span>EEE Faculty</span>
+                <span style="font-size: 0.725rem; padding: 1px 7px; border-radius: 12px; font-weight: 800;
+                    {% if selected_stream == 'EEE' %}background: rgba(255,255,255,0.3); color: #ffffff;{% else %}background: #fae8ff; color: #86198f; border: 1px solid #f5d0fe;{% endif %}">
+                    {% for tab in stream_tabs %}{% if tab.code == 'EEE' %}{{ tab.count }}{% endif %}{% endfor %}
+                </span>
+            </a>
+
+            <!-- CIVIL -->
+            <a href="?stream=CIVIL"
+               style="padding: 0.55rem 1.15rem; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+               {% if selected_stream == 'CIVIL' %}
+                   background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); color: #ffffff; border: 1.5px solid #e11d48; box-shadow: 0 4px 10px rgba(225,29,72,0.3);
+               {% else %}
+                   background: #fff1f2; color: #9f1239; border: 1.5px solid #fecdd3;
+               {% endif %}">
+                <i class="fa-solid fa-building"></i>
+                <span>CIVIL Faculty</span>
+                <span style="font-size: 0.725rem; padding: 1px 7px; border-radius: 12px; font-weight: 800;
+                    {% if selected_stream == 'CIVIL' %}background: rgba(255,255,255,0.3); color: #ffffff;{% else %}background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3;{% endif %}">
+                    {% for tab in stream_tabs %}{% if tab.code == 'CIVIL' %}{{ tab.count }}{% endif %}{% endfor %}
+                </span>
+            </a>
+
+            <!-- AIDS -->
+            <a href="?stream=AIDS"
+               style="padding: 0.55rem 1.15rem; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+               {% if selected_stream == 'AIDS' %}
+                   background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: #ffffff; border: 1.5px solid #0891b2; box-shadow: 0 4px 10px rgba(8,145,178,0.3);
+               {% else %}
+                   background: #ecfeff; color: #155e75; border: 1.5px solid #a5f3fc;
+               {% endif %}">
+                <i class="fa-solid fa-brain"></i>
+                <span>AIDS Faculty</span>
+                <span style="font-size: 0.725rem; padding: 1px 7px; border-radius: 12px; font-weight: 800;
+                    {% if selected_stream == 'AIDS' %}background: rgba(255,255,255,0.3); color: #ffffff;{% else %}background: #cffafe; color: #155e75; border: 1px solid #a5f3fc;{% endif %}">
+                    {% for tab in stream_tabs %}{% if tab.code == 'AIDS' %}{{ tab.count }}{% endif %}{% endfor %}
+                </span>
+            </a>
+
+            <!-- ALL -->
+            <a href="?stream=ALL"
+               style="padding: 0.55rem 1.15rem; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+               {% if selected_stream == 'ALL' %}
+                   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; border: 1.5px solid #1e293b; box-shadow: 0 4px 10px rgba(30,41,59,0.3);
+               {% else %}
+                   background: #f8fafc; color: #334155; border: 1.5px solid #cbd5e1;
+               {% endif %}">
+                <i class="fa-solid fa-users"></i>
+                <span>All Streams</span>
+                <span style="font-size: 0.725rem; padding: 1px 7px; border-radius: 12px; font-weight: 800;
+                    {% if selected_stream == 'ALL' %}background: rgba(255,255,255,0.3); color: #ffffff;{% else %}background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;{% endif %}">
+                    {{ all_count }}
+                </span>
+            </a>
+        </div>
+    </div>
+
+<!-- ========================================== -->
+<!-- QUICK ATTENDANCE ROSTER FOR SELECTED STREAM -->
+<!-- ========================================== -->
+<div class="card" style="padding: 0; overflow: hidden; margin-bottom: 2rem; border-radius: 14px; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+    <div style="padding: 1rem 1.25rem; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-bottom: 1.5px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="font-weight: 800; font-size: 1.05rem; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-user-check" style="color: #2563eb;"></i>
+                Today's Roster: 
+                <span style="color: #1d4ed8; text-decoration: underline;">
+                    {% if selected_stream == 'ALL' %}All Faculty{% else %}{{ selected_stream }} Department Faculty{% endif %}
+                </span>
+                <span style="font-size: 0.8rem; font-weight: 600; color: #64748b;">({{ teachers|length }} Faculty Members)</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 3px;">
+                Click <strong>Present</strong>, <strong>Absent</strong>, or <strong>On Leave</strong> to mark individual attendance in 1 click.
+            </div>
+        </div>
+
+        {% if teachers %}
+            <form method="POST" style="margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="mark_all_stream_present">
+                <button type="submit" class="btn" style="background: #059669; color: #ffffff; font-weight: 700; font-size: 0.825rem; padding: 0.5rem 1rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(5,150,105,0.3);"
+                        onclick="return confirm('Mark all {{ teachers|length }} {{ selected_stream }} faculty members as Present for today?');">
+                    <i class="fa-solid fa-users-check"></i> Mark All {% if selected_stream != 'ALL' %}{{ selected_stream }}{% endif %} Faculty Present
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- Faculty Roster Table -->
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+            <thead>
+                <tr style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; color: #475569; text-transform: uppercase; font-size: 0.725rem; letter-spacing: 0.05em;">
+                    <th style="padding: 0.75rem 1.25rem;">Teacher ID</th>
+                    <th style="padding: 0.75rem 1.25rem;">Faculty Name</th>
+                    <th style="padding: 0.75rem 1.25rem;">Department / Stream</th>
+                    <th style="padding: 0.75rem 1.25rem;">Designation</th>
+                    <th style="padding: 0.75rem 1.25rem; text-align: center;">Today's Status</th>
+                    <th style="padding: 0.75rem 1.25rem; text-align: center;">1-Click Attendance Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in teachers %}
+                    <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='#ffffff';">
+                        <td style="padding: 0.9rem 1.25rem; font-family: monospace; font-weight: 800; color: #2563eb;">
+                            {{ t.teacher_id }}
+                        </td>
+                        <td style="padding: 0.9rem 1.25rem;">
+                            <div style="font-weight: 700; color: #0f172a;">{{ t.full_name }}</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">{{ t.email|default:"" }}</div>
+                        </td>
+                        <td style="padding: 0.9rem 1.25rem;">
+                            <span style="font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;">
+                                {{ t.department.code|default:"General" }}
+                            </span>
+                        </td>
+                        <td style="padding: 0.9rem 1.25rem; color: #475569; font-weight: 500;">
+                            {{ t.designation|default:"Faculty" }}
+                        </td>
+                        <td style="padding: 0.9rem 1.25rem; text-align: center;">
+                            {% if t.today_status == 'Present' %}
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; background-color: #dcfce7; color: #166534; border: 1px solid #86efac;">
+                                    <i class="fa-solid fa-circle-check"></i> Present
+                                </span>
+                            {% elif t.today_status == 'On Leave' %}
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                                    <i class="fa-solid fa-circle-pause"></i> On Leave
+                                </span>
+                            {% elif t.today_status == 'Absent' %}
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">
+                                    <i class="fa-solid fa-circle-xmark"></i> Absent
+                                </span>
+                            {% else %}
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1;">
+                                    <i class="fa-regular fa-clock"></i> Not Marked
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.9rem 1.25rem; text-align: center;">
+                            <form method="POST" style="display: inline-flex; gap: 0.35rem; margin: 0; align-items: center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="quick_mark">
+                                <input type="hidden" name="teacher_id" value="{{ t.id }}">
+
+                                <button type="submit" name="status" value="Present" 
+                                        title="Mark Present"
+                                        style="border: 1px solid {% if t.today_status == 'Present' %}#15803d{% else %}#86efac{% endif %}; background: {% if t.today_status == 'Present' %}#16a34a{% else %}#f0fdf4{% endif %}; color: {% if t.today_status == 'Present' %}#ffffff{% else %}#166534{% endif %}; padding: 0.35rem 0.7rem; border-radius: 6px; font-size: 0.775rem; font-weight: 700; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-check"></i> Present
+                                </button>
+
+                                <button type="submit" name="status" value="Absent" 
+                                        title="Mark Absent"
+                                        style="border: 1px solid {% if t.today_status == 'Absent' %}#b91c1c{% else %}#fca5a5{% endif %}; background: {% if t.today_status == 'Absent' %}#dc2626{% else %}#fef2f2{% endif %}; color: {% if t.today_status == 'Absent' %}#ffffff{% else %}#991b1b{% endif %}; padding: 0.35rem 0.7rem; border-radius: 6px; font-size: 0.775rem; font-weight: 700; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-xmark"></i> Absent
+                                </button>
+
+                                <button type="submit" name="status" value="On Leave" 
+                                        title="Mark On Leave"
+                                        style="border: 1px solid {% if t.today_status == 'On Leave' %}#b45309{% else %}#fde68a{% endif %}; background: {% if t.today_status == 'On Leave' %}#d97706{% else %}#fffbeb{% endif %}; color: {% if t.today_status == 'On Leave' %}#ffffff{% else %}#92400e{% endif %}; padding: 0.35rem 0.7rem; border-radius: 6px; font-size: 0.775rem; font-weight: 700; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-umbrella-beach"></i> Leave
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 2.5rem; text-align: center; color: #64748b;">
+                            <i class="fa-solid fa-user-slash" style="font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 0.5rem;"></i>
+                            No active faculty members found in <strong>{{ selected_stream }}</strong> stream.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MANUAL / CUSTOM DATE ATTENDANCE FORM (Collapsible) -->
+<!-- ========================================== -->
+<div class="card" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+        <h3 class="card-title" style="margin: 0; font-size: 1rem;">
+            <i class="fa-solid fa-calendar-day" style="color: var(--primary-color); margin-right: 6px;"></i> Custom Date / Single Faculty Attendance Entry
+        </h3>
+        <button type="button" onclick="toggleManualAttendance()" class="btn btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.75rem;">
+            Toggle Form
+        </button>
+    </div>
+
+    <div id="manualAttendanceSection" style="display: none;">
+        <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+            {% csrf_token %}
+            <div>
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Select Teacher *</label>
+                {{ form.teacher }}
+            </div>
+            <div>
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Attendance Date *</label>
+                {{ form.attendance_date }}
+            </div>
+            <div>
+                <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.3rem;">Status *</label>
+                {{ form.status }}
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 42px;">
+                    <i class="fa-solid fa-check"></i> Save Record
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- RECENT FACULTY ATTENDANCE LOGS -->
+<!-- ========================================== -->
+<div class="card" style="padding: 0; overflow: hidden; border-radius: 12px;">
+    <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary-color); margin-right: 6px;"></i> 
+            Recent Faculty Attendance History Log 
+            {% if selected_stream != 'ALL' %}({{ selected_stream }}){% endif %}
+        </div>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Last 50 recorded logs</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+            <thead>
+                <tr style="background-color: #f1f5f9; border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-transform: uppercase; font-size: 0.725rem; letter-spacing: 0.05em;">
+                    <th style="padding: 0.85rem 1.25rem;">Teacher ID</th>
+                    <th style="padding: 0.85rem 1.25rem;">Faculty Name</th>
+                    <th style="padding: 0.85rem 1.25rem;">Department / Stream</th>
+                    <th style="padding: 0.85rem 1.25rem;">Date</th>
+                    <th style="padding: 0.85rem 1.25rem; text-align: center;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rec in records %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.85rem 1.25rem; font-weight: 700; color: var(--primary-color); font-family: monospace;">{{ rec.teacher.teacher_id }}</td>
+                        <td style="padding: 0.85rem 1.25rem; font-weight: 600;">{{ rec.teacher.full_name }}</td>
+                        <td style="padding: 0.85rem 1.25rem; color: var(--text-muted);">{{ rec.teacher.department.name|default:"General Faculty" }}</td>
+                        <td style="padding: 0.85rem 1.25rem;">{{ rec.attendance_date|date:"Y-m-d" }}</td>
+                        <td style="padding: 0.85rem 1.25rem; text-align: center;">
+                            {% if rec.status == 'Present' %}
+                                <span style="display: inline-block; padding: 0.2rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background-color: #dcfce7; color: #166534;">Present</span>
+                            {% elif rec.status == 'On Leave' %}
+                                <span style="display: inline-block; padding: 0.2rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background-color: #fef3c7; color: #92400e;">On Leave</span>
+                            {% else %}
+                                <span style="display: inline-block; padding: 0.2rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background-color: #fee2e2; color: #991b1b;">Absent</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+                            No teacher attendance records found for this stream.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+<script>
+    function toggleManualAttendance() {
+        const sec = document.getElementById('manualAttendanceSection');
+        if (sec) {
+            sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+</script>
+{% endblock %}

@@ -6,6 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 .env
 
@@ -22,3 +23,5 @@ staticfiles/
 .idea/
 .DS_Store
 Thumbs.db
+scratch/
+

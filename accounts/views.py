@@ -7,13 +7,13 @@ from .forms import UserLoginForm, UserProfileForm
 
 def login_view(request):
     """
-    Handles secure user login and role-based redirect.
+    Handles secure user login (Username or Email) and role-based redirect.
     """
     if request.user.is_authenticated:
         return redirect('core:home')
 
     if request.method == 'POST':
-        form = UserLoginForm(request, data=request.POST)
+        form = UserLoginForm(request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
@@ -21,7 +21,7 @@ def login_view(request):
             next_url = request.GET.get('next', 'core:home')
             return redirect(next_url)
         else:
-            messages.error(request, "Invalid username or password. Please check your credentials.")
+            messages.error(request, "Invalid credentials. Please check your username/email and password.")
     else:
         form = UserLoginForm()
 
@@ -66,7 +66,7 @@ def change_password_view(request):
         form = PasswordChangeForm(user=request.user, data=request.POST)
         if form.is_valid():
             user = form.save()
-            update_session_auth_hash(request, user)  # Keep user logged in after password change
+            update_session_auth_hash(request, user)
             messages.success(request, "Your password was successfully updated!")
             return redirect('accounts:profile')
         else:

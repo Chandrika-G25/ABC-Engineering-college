@@ -12,19 +12,21 @@ urlpatterns = [
     path('students/<int:pk>/edit/', views.student_edit_view, name='student_edit'),
     path('students/<int:pk>/delete/', views.student_delete_view, name='student_delete'),
 
-    # Teachers
+    # Teachers & Teacher Attendance
     path('teachers/', views.teacher_list_view, name='teacher_list'),
+    path('teachers/add/', views.teacher_create_view, name='teacher_add'),
+    path('teachers/<int:pk>/edit/', views.teacher_edit_view, name='teacher_edit'),
+    path('teachers/<int:pk>/delete/', views.teacher_delete_view, name='teacher_delete'),
+    path('teacher-attendance/', views.teacher_attendance_list_view, name='teacher_attendance_list'),
 
-    # Subjects
-    path('subjects/', views.subject_list_view, name='subject_list'),
-
-    # Attendance
+    # Student Attendance
     path('attendance/', views.attendance_list_view, name='attendance_list'),
 
-    # Examination Marks
+    # Subjects & Marks
+    path('subjects/', views.subject_list_view, name='subject_list'),
     path('marks/', views.marks_list_view, name='marks_list'),
 
-    # Fee Management
+    # Fees
     path('fees/', views.fee_list_view, name='fee_list'),
     path('fees/add/', views.fee_create_view, name='fee_add'),
     path('fees/<int:pk>/pay/', views.fee_pay_view, name='fee_pay'),

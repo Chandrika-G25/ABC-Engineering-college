@@ -1,0 +1,458 @@
+<!-- Record Fee Payment Modal Dialog -->
+<div id="recordFeeModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; overflow-y: auto;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 720px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1.5px solid #a7f3d0; overflow: hidden; margin: auto; animation: feeModalFadeIn 0.2s ease-out;">
+        
+        <!-- Modal Header -->
+        <div style="background: linear-gradient(135deg, #065f46 0%, #059669 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-receipt"></i> Record Student Fee Payment
+                </h3>
+                <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #d1fae5;">
+                    Standard Fee: ₹70,000.00 &bull; Year-based Semester Payment Eligibility
+                </p>
+            </div>
+            <button type="button" onclick="closeRecordFeeModal()" style="background: rgba(255,255,255,0.2); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
+        </div>
+
+        <!-- Modal Form -->
+        <form method="POST" id="recordFeeForm" style="padding: 1.5rem;" onsubmit="return validateFeeSubmission()">
+            {% csrf_token %}
+            <input type="hidden" name="record_fee_payment" value="1">
+            <input type="hidden" name="student" id="feeModalStudentId" required>
+
+            <!-- 1. STREAM & 2. ACADEMIC YEAR -->
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem; margin-bottom: 1.15rem;">
+                <!-- 1. Stream Dropdown -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        1. Stream <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select id="feeModalStreamSelect" onchange="onFeeStreamChange(this.value)" 
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 800; font-size: 0.875rem; color: #047857; background: #ffffff;" required>
+                        <option value="ECE">ECE (Electronics & Communication)</option>
+                        <option value="CSE">CSE (Computer Science)</option>
+                        <option value="IT">IT (Information Technology)</option>
+                        <option value="EEE">EEE (Electrical & Electronics)</option>
+                        <option value="CIVIL">CIVIL (Civil Engineering)</option>
+                        <option value="AIDS">AIDS (AI & Data Science)</option>
+                    </select>
+                </div>
+
+                <!-- 2. Academic Year Dropdown -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        2. Academic Year <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select id="feeModalYearSelect" onchange="onFeeYearChange(this.value)" 
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 800; font-size: 0.875rem; color: #7c3aed; background: #ffffff;" required>
+                        <option value="I">Year I</option>
+                        <option value="II">Year II</option>
+                        <option value="III">Year III</option>
+                        <option value="IV">Year IV</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 3. STUDENT ROLL NUMBER & 4. STUDENT NAME -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.15rem;">
+                <!-- 3. Student Roll Number Dropdown (Filtered by Stream & Year) -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        3. Student Roll Number <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select name="student_roll_select" id="feeModalRollNoSelect" onchange="onFeeRollNoPicked(this.value)" 
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-family: monospace; font-weight: 800; font-size: 0.875rem; color: #1d4ed8; background: #ffffff;" required>
+                        <option value="">-- Select Roll Number --</option>
+                    </select>
+                </div>
+
+                <!-- 4. Student Name Dropdown (Filtered by Stream & Year) -->
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        4. Student Name <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select name="student_name_select" id="feeModalNameSelect" onchange="onFeeNamePicked(this.value)" 
+                            style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 700; font-size: 0.875rem; color: #0f172a; background: #ffffff;" required>
+                        <option value="">-- Select Student Name --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 5. SEMESTER TO PAY FOR (RESTRICTED TO ALLOWED SEMESTERS) -->
+            <div style="margin-bottom: 1.15rem;">
+                <label style="display: block; font-weight: 800; font-size: 0.85rem; color: #047857; margin-bottom: 0.35rem;">
+                    5. Semester to Pay For (Roman Numerals) <span style="color: #dc2626;">*</span>
+                </label>
+                <select name="semester" id="feeModalSemesterSelect" onchange="onFeeSemesterChange(this.value)" 
+                        style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1.5px solid #a7f3d0; font-weight: 800; color: #065f46; font-size: 0.9rem; background: #ffffff;" required>
+                    <option value="">-- Select Semester --</option>
+                </select>
+            </div>
+
+            <!-- 6. TOTAL FEE & 7. CURRENT BALANCE DUE DISPLAY -->
+            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #a7f3d0; border-radius: 12px; padding: 1rem; margin-bottom: 1.15rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; text-align: center;">
+                    <div style="background: #ffffff; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1px solid #d1fae5;">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #475569;">Total Semester Fee</div>
+                        <div style="font-size: 1.15rem; font-weight: 900; color: #0f172a;" id="feeModalTotalFeeDisplay">₹70,000.00</div>
+                    </div>
+                    <div style="background: #ffffff; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1px solid #d1fae5;">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #166534;">Already Paid</div>
+                        <div style="font-size: 1.15rem; font-weight: 900; color: #15803d;" id="feeModalPaidDisplay">₹0.00</div>
+                    </div>
+                    <div style="background: #ffffff; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1px solid #fecdd3;">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #991b1b;">Current Balance Due</div>
+                        <div style="font-size: 1.15rem; font-weight: 900; color: #dc2626;" id="feeModalDueDisplay">₹70,000.00</div>
+                    </div>
+                </div>
+                <div style="margin-top: 8px; text-align: right;">
+                    <button type="button" onclick="fillFullBalanceDue()" class="btn" style="font-size: 0.75rem; padding: 3px 10px; background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 6px; font-weight: 700; cursor: pointer;">
+                        <i class="fa-solid fa-arrow-down"></i> Auto-fill Full Balance Due
+                    </button>
+                </div>
+            </div>
+
+            <!-- 8. HOW MUCH WILL PAY (PAYMENT AMOUNT) & 9. PAYMENT METHOD -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <!-- 8. Payment Amount -->
+                <div>
+                    <label style="display: block; font-weight: 800; font-size: 0.85rem; color: #15803d; margin-bottom: 0.35rem;">
+                        8. How Much Will Pay (Amount in ₹) <span style="color: #dc2626;">*</span>
+                    </label>
+                    <input type="number" step="100" min="1" max="70000" name="payment_amount" id="feeModalPaymentAmountInput" placeholder="e.g. 35000" required
+                           style="width: 100%; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1.5px solid #86efac; font-weight: 800; font-size: 1rem; color: #14532d; background: #ffffff;">
+                    <span style="font-size: 0.725rem; color: #166534; font-weight: 600;">Enter payment amount to credit</span>
+                </div>
+
+                <!-- 9. Payment Method Dropdown -->
+                <div>
+                    <label style="display: block; font-weight: 800; font-size: 0.85rem; color: #1e293b; margin-bottom: 0.35rem;">
+                        9. Payment Method <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select name="payment_method" id="feeModalPaymentMethodSelect" required
+                            style="width: 100%; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-weight: 700; font-size: 0.9rem; color: #0f172a; background: #ffffff;">
+                        <option value="Online / UPI" selected>Online / UPI (GPay, PhonePe, NetBanking)</option>
+                        <option value="Cash">Cash (College Accounts Counter)</option>
+                        <option value="Bank Transfer / NEFT">Bank Transfer / NEFT / RTGS</option>
+                        <option value="Demand Draft (DD)">Demand Draft (DD)</option>
+                        <option value="Cheque">Cheque</option>
+                    </select>
+                    <span style="font-size: 0.725rem; color: #64748b; font-weight: 600;">Standard payment processing channel</span>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <button type="button" id="modalPrintReceiptBtn" onclick="printReceiptForCurrentModalStudent()" class="btn" style="padding: 0.6rem 1.25rem; font-weight: 700; background: #1e40af; color: white; border: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(30,64,175,0.25);">
+                    <i class="fa-solid fa-print"></i> Print Fee Receipt
+                </button>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" onclick="closeRecordFeeModal()" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-weight: 600;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.75rem; font-weight: 800; background: linear-gradient(135deg, #059669 0%, #047857 100%); border: none; box-shadow: 0 4px 10px rgba(5,150,105,0.25);">
+                        <i class="fa-solid fa-receipt"></i> Record Payment & Issue Receipt
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+@keyframes feeModalFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+</style>
+
+<script>
+    // Load student & fee data from context
+    const feeStudentsData = {{ fee_students_json|default:'[]'|safe }};
+    const feeLookupData = {{ fee_lookup_json|default:'{}'|safe }};
+
+    // Year-based allowed semesters for fee payment:
+    // 1st Year: Sem I, Sem II (2 sems)
+    // 2nd Year: Sem I to Sem IV (4 sems)
+    // 3rd Year: Sem I to Sem VI (6 sems - 'until 6 sem only')
+    // 4th Year: Sem I to Sem VIII (8 sems)
+    const FEE_YEAR_ALLOWED_SEMESTERS = {
+        'I': ['Sem I', 'Sem II'],
+        'II': ['Sem I', 'Sem II', 'Sem III', 'Sem IV'],
+        'III': ['Sem I', 'Sem II', 'Sem III', 'Sem IV', 'Sem V', 'Sem VI'],
+        'IV': ['Sem I', 'Sem II', 'Sem III', 'Sem IV', 'Sem V', 'Sem VI', 'Sem VII', 'Sem VIII']
+    };
+
+    let currentFeeDueAmount = 70000;
+
+    function openRecordFeeModal(preselectedStudentId = null, preselectedSemester = null) {
+        const modal = document.getElementById('recordFeeModal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+
+        if (preselectedStudentId) {
+            const student = feeStudentsData.find(s => String(s.id) === String(preselectedStudentId));
+            if (student) {
+                const streamSelect = document.getElementById('feeModalStreamSelect');
+                const yearSelect = document.getElementById('feeModalYearSelect');
+                if (streamSelect) streamSelect.value = student.stream || 'ECE';
+                if (yearSelect) yearSelect.value = student.year || 'I';
+                updateFeeStudentsDropdowns(student.id);
+                updateFeeSemesterDropdown(student.year || 'I', preselectedSemester);
+                updateFeeBalanceDisplay();
+                return;
+            }
+        }
+
+        // Default from currently selected stream and year if available
+        const streamSelect = document.getElementById('feeModalStreamSelect');
+        const yearSelect = document.getElementById('feeModalYearSelect');
+
+        // Check if page has active filters
+        const activeStreamMeta = document.querySelector('[data-active-fee-stream]');
+        if (activeStreamMeta && activeStreamMeta.getAttribute('data-active-fee-stream') && streamSelect) {
+            streamSelect.value = activeStreamMeta.getAttribute('data-active-fee-stream');
+        }
+        const activeYearMeta = document.querySelector('[data-active-fee-year]');
+        if (activeYearMeta && activeYearMeta.getAttribute('data-active-fee-year') && yearSelect) {
+            yearSelect.value = activeYearMeta.getAttribute('data-active-fee-year');
+        }
+
+        updateFeeStudentsDropdowns();
+        updateFeeSemesterDropdown(yearSelect ? yearSelect.value : 'I', preselectedSemester);
+        updateFeeBalanceDisplay();
+    }
+
+    function closeRecordFeeModal() {
+        const modal = document.getElementById('recordFeeModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Close on background click
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('recordFeeModal');
+        if (event.target === modal) {
+            closeRecordFeeModal();
+        }
+    });
+
+    // 1. When Stream Changes
+    function onFeeStreamChange(streamCode) {
+        updateFeeStudentsDropdowns();
+        updateFeeBalanceDisplay();
+    }
+
+    // 2. When Academic Year Changes
+    function onFeeYearChange(yearCode) {
+        updateFeeStudentsDropdowns();
+        updateFeeSemesterDropdown(yearCode);
+        updateFeeBalanceDisplay();
+    }
+
+    // Update Roll Number & Student Name dropdowns according to chosen Stream & Year
+    function updateFeeStudentsDropdowns(selectedStudentId = null) {
+        const streamSelect = document.getElementById('feeModalStreamSelect');
+        const yearSelect = document.getElementById('feeModalYearSelect');
+        const rollSelect = document.getElementById('feeModalRollNoSelect');
+        const nameSelect = document.getElementById('feeModalNameSelect');
+        const studentIdHidden = document.getElementById('feeModalStudentId');
+
+        if (!rollSelect || !nameSelect || !streamSelect || !yearSelect) return;
+
+        const stream = streamSelect.value;
+        const year = yearSelect.value;
+
+        // Filter students strictly matching Stream and Year
+        const filtered = feeStudentsData.filter(s => 
+            (s.stream || '').toUpperCase() === (stream || '').toUpperCase() &&
+            (s.year || '').toUpperCase() === (year || '').toUpperCase()
+        );
+
+        rollSelect.innerHTML = '<option value="">-- Select Roll Number --</option>';
+        nameSelect.innerHTML = '<option value="">-- Select Student Name --</option>';
+
+        if (filtered.length === 0) {
+            rollSelect.innerHTML = `<option value="">No active students in ${stream} Year ${year}</option>`;
+            nameSelect.innerHTML = `<option value="">No active students in ${stream} Year ${year}</option>`;
+            studentIdHidden.value = '';
+            return;
+        }
+
+        filtered.forEach(s => {
+            // Roll No option
+            const optRoll = document.createElement('option');
+            optRoll.value = s.id;
+            optRoll.textContent = `${s.roll_no} (${s.full_name})`;
+            rollSelect.appendChild(optRoll);
+
+            // Name option
+            const optName = document.createElement('option');
+            optName.value = s.id;
+            optName.textContent = `${s.full_name} - ${s.roll_no}`;
+            nameSelect.appendChild(optName);
+        });
+
+        // Select student
+        if (selectedStudentId && filtered.some(s => String(s.id) === String(selectedStudentId))) {
+            rollSelect.value = selectedStudentId;
+            nameSelect.value = selectedStudentId;
+            studentIdHidden.value = selectedStudentId;
+        } else {
+            rollSelect.value = filtered[0].id;
+            nameSelect.value = filtered[0].id;
+            studentIdHidden.value = filtered[0].id;
+        }
+    }
+
+    // 3. When Roll Number is Picked
+    function onFeeRollNoPicked(studentId) {
+        const studentIdHidden = document.getElementById('feeModalStudentId');
+        const nameSelect = document.getElementById('feeModalNameSelect');
+        studentIdHidden.value = studentId;
+        if (nameSelect) {
+            nameSelect.value = studentId;
+        }
+        updateFeeBalanceDisplay();
+    }
+
+    // 4. When Student Name is Picked
+    function onFeeNamePicked(studentId) {
+        const studentIdHidden = document.getElementById('feeModalStudentId');
+        const rollSelect = document.getElementById('feeModalRollNoSelect');
+        studentIdHidden.value = studentId;
+        if (rollSelect) {
+            rollSelect.value = studentId;
+        }
+        updateFeeBalanceDisplay();
+    }
+
+    // 5. Populate Semester Dropdown based on Year
+    function updateFeeSemesterDropdown(yearCode, preferredSemester = null) {
+        const semSelect = document.getElementById('feeModalSemesterSelect');
+        if (!semSelect) return;
+
+        const allowed = FEE_YEAR_ALLOWED_SEMESTERS[yearCode] || FEE_YEAR_ALLOWED_SEMESTERS['I'];
+        semSelect.innerHTML = '';
+
+        allowed.forEach(sem => {
+            const opt = document.createElement('option');
+            opt.value = sem;
+            opt.textContent = `${sem}`;
+            semSelect.appendChild(opt);
+        });
+
+        if (preferredSemester && allowed.includes(preferredSemester)) {
+            semSelect.value = preferredSemester;
+        } else {
+            // Default to primary current semester of that year
+            let defaultSem = allowed[allowed.length - 1];
+            if (yearCode === 'I') defaultSem = 'Sem I';
+            else if (yearCode === 'II') defaultSem = 'Sem III';
+            else if (yearCode === 'III') defaultSem = 'Sem V';
+            else if (yearCode === 'IV') defaultSem = 'Sem VII';
+
+            if (allowed.includes(defaultSem)) {
+                semSelect.value = defaultSem;
+            } else if (allowed.length > 0) {
+                semSelect.value = allowed[0];
+            }
+        }
+    }
+
+    // 5. When Semester Changes
+    function onFeeSemesterChange(semesterCode) {
+        updateFeeBalanceDisplay();
+    }
+
+    // Update Live Fee & Balance Due Display
+    function updateFeeBalanceDisplay() {
+        const studentId = document.getElementById('feeModalStudentId').value;
+        const semSelect = document.getElementById('feeModalSemesterSelect');
+        const semester = semSelect ? semSelect.value : 'Sem I';
+
+        const totalDisplay = document.getElementById('feeModalTotalFeeDisplay');
+        const paidDisplay = document.getElementById('feeModalPaidDisplay');
+        const dueDisplay = document.getElementById('feeModalDueDisplay');
+        const amountInput = document.getElementById('feeModalPaymentAmountInput');
+
+        const key = `${studentId}_${semester}`;
+        const feeInfo = feeLookupData[key];
+
+        let total = 70000;
+        let paid = 0;
+        let due = 70000;
+
+        if (feeInfo) {
+            total = parseFloat(feeInfo.total) || 70000;
+            paid = parseFloat(feeInfo.paid) || 0;
+            due = Math.max(0, total - paid);
+        }
+
+        currentFeeDueAmount = due;
+
+        if (totalDisplay) totalDisplay.textContent = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        if (paidDisplay) paidDisplay.textContent = `₹${paid.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        if (dueDisplay) dueDisplay.textContent = `₹${due.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+
+        if (amountInput) {
+            amountInput.max = due > 0 ? due : 70000;
+            if (due > 0) {
+                amountInput.value = due;
+            } else {
+                amountInput.value = '';
+                amountInput.placeholder = 'Fee already fully paid (₹0 due)';
+            }
+        }
+
+        const printBtn = document.getElementById('modalPrintReceiptBtn');
+        if (printBtn) {
+            if (paid > 0) {
+                printBtn.style.display = 'inline-flex';
+                printBtn.innerHTML = `<i class="fa-solid fa-print"></i> Print Fee Receipt (Paid: ₹${paid.toLocaleString('en-IN')})`;
+            } else {
+                printBtn.style.display = 'none';
+            }
+        }
+    }
+
+    function printReceiptForCurrentModalStudent() {
+        const studentId = document.getElementById('feeModalStudentId').value;
+        const semSelect = document.getElementById('feeModalSemesterSelect');
+        const semester = semSelect ? semSelect.value : 'Sem I';
+        if (!studentId) {
+            alert('Please select a student roll number first.');
+            return;
+        }
+        openPrintReceiptModal(studentId, semester);
+    }
+
+    function fillFullBalanceDue() {
+        const amountInput = document.getElementById('feeModalPaymentAmountInput');
+        if (amountInput && currentFeeDueAmount > 0) {
+            amountInput.value = currentFeeDueAmount;
+        }
+    }
+
+    function validateFeeSubmission() {
+        const studentId = document.getElementById('feeModalStudentId').value;
+        const semester = document.getElementById('feeModalSemesterSelect').value;
+        const amount = document.getElementById('feeModalPaymentAmountInput').value;
+
+        if (!studentId) {
+            alert('Please select a student roll number.');
+            return false;
+        }
+        if (!semester) {
+            alert('Please select a semester.');
+            return false;
+        }
+        if (!amount || parseFloat(amount) <= 0) {
+            alert('Please enter a valid payment amount greater than ₹0.');
+            return false;
+        }
+        return true;
+    }
+</script>

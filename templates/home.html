@@ -1,161 +1,190 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard Overview | Student Management System{% endblock %}
+{% block title %}ABC Engineering College | SMS ERP{% endblock %}
 
-{% block header_title %}University System Dashboard{% endblock %}
+{% block header_title %}ABC Engineering College Dashboard{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center;">
+<!-- Top Header Banner -->
+<div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 1.75rem 2rem; border-radius: 16px; color: white; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.35); border: 1px solid rgba(255, 255, 255, 0.08);">
     <div>
-        <h1 style="font-size: 1.65rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">
-            System Control Center
+        <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.35rem; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8;"></i> ABC Engineering College
         </h1>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">
-            Real-time analytics and management overview for <strong>{{ current_year.name|default:"Active Academic Session" }}</strong>.
+        <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">
+            Central management platform for <strong>ECE, CSE, IT, EEE, CIVIL, & AIDS</strong> B.Tech streams.
         </p>
     </div>
-    {% if user.is_admin_user %}
-        <div style="display: flex; gap: 0.75rem;">
-            <a href="{% url 'core:department_add' %}" class="btn btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.85rem;">
-                <i class="fa-solid fa-plus"></i> Dept
-            </a>
-            <a href="{% url 'core:course_add' %}" class="btn btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.85rem;">
-                <i class="fa-solid fa-plus"></i> Course
-            </a>
-            <a href="{% url 'core:fee_add' %}" class="btn btn-primary" style="padding: 0.5rem 0.85rem; font-size: 0.85rem;">
-                <i class="fa-solid fa-file-invoice-dollar"></i> Issue Fee
-            </a>
-        </div>
-    {% endif %}
-</div>
-
-<!-- Primary System Metrics Grid -->
-<div class="grid-stats">
-    <div class="card stat-card">
-        <div class="stat-icon" style="background-color: #eff6ff; color: #2563eb;">
-            <i class="fa-solid fa-user-graduate"></i>
-        </div>
-        <div>
-            <div class="stat-val">{{ students_count }}</div>
-            <div class="stat-lbl">Enrolled Students</div>
-        </div>
-    </div>
-
-    <div class="card stat-card">
-        <div class="stat-icon" style="background-color: #f0fdf4; color: #10b981;">
-            <i class="fa-solid fa-chalkboard-user"></i>
-        </div>
-        <div>
-            <div class="stat-val">{{ teachers_count }}</div>
-            <div class="stat-lbl">Faculty Teachers</div>
-        </div>
-    </div>
-
-    <div class="card stat-card">
-        <div class="stat-icon" style="background-color: #fef3c7; color: #d97706;">
-            <i class="fa-solid fa-building-columns"></i>
-        </div>
-        <div>
-            <div class="stat-val">{{ dept_count }}</div>
-            <div class="stat-lbl">Active Departments</div>
-        </div>
-    </div>
-
-    <div class="card stat-card">
-        <div class="stat-icon" style="background-color: #f3e8ff; color: #9333ea;">
-            <i class="fa-solid fa-book-bookmark"></i>
-        </div>
-        <div>
-            <div class="stat-val">{{ course_count }}</div>
-            <div class="stat-lbl">Offered Courses</div>
-        </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{% url 'core:student_add' %}" class="btn" style="padding: 0.65rem 1.15rem; font-size: 0.85rem; border-radius: 10px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border: 1px solid #3b82f6; box-shadow: 0 4px 12px rgba(37,99,235,0.35); text-decoration: none; font-weight: 600;">
+            <i class="fa-solid fa-user-plus"></i> Add Student
+        </a>
+        <a href="{% url 'core:teacher_add' %}" class="btn" style="padding: 0.65rem 1.15rem; font-size: 0.85rem; border-radius: 10px; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; border: 1px solid #10b981; box-shadow: 0 4px 12px rgba(5,150,105,0.35); text-decoration: none; font-weight: 600;">
+            <i class="fa-solid fa-user-tie"></i> Add Faculty Member
+        </a>
+        <a href="{% url 'core:department_add' %}" class="btn" style="padding: 0.65rem 1.15rem; font-size: 0.85rem; border-radius: 10px; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; border: 1px solid #8b5cf6; box-shadow: 0 4px 12px rgba(124,58,237,0.35); text-decoration: none; font-weight: 600;">
+            <i class="fa-solid fa-building"></i> Add Department
+        </a>
     </div>
 </div>
 
-<!-- Financial Fee Collection Overview Grid -->
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
-            <h3 class="card-title" style="margin-bottom: 0;">
-                <i class="fa-solid fa-wallet" style="color: #10b981; margin-right: 6px;"></i> Fee Collection Financial Metrics
-            </h3>
-            <a href="{% url 'core:fee_list' %}" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none; font-weight: 600;">View All Fees &rarr;</a>
+<!-- ==================================================================== -->
+<!-- SECTION 1: STUDENT MANAGEMENT DASHBOARD (Blue Color Theme)          -->
+<!-- ==================================================================== -->
+<div style="margin-bottom: 2.5rem; background: linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%); border: 1.5px solid #bfdbfe; border-radius: 16px; padding: 1.75rem; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.05);">
+    
+    <!-- Section Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dbeafe; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <h2 style="font-size: 1.35rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 10px; margin: 0;">
+                <span style="background: #2563eb; color: #ffffff; padding: 6px 12px; border-radius: 10px; font-size: 1rem; box-shadow: 0 2px 6px rgba(37,99,235,0.3);"><i class="fa-solid fa-users"></i></span>
+                Student Management Dashboard
+            </h2>
+            <p style="color: #475569; font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;">Student metrics, stream-wise roll numbers, fee collection & attendance tracking.</p>
         </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; text-align: center;">
-            <div style="background-color: var(--bg-body); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Total Billed</span>
-                <strong style="font-size: 1.25rem; color: var(--text-main);">₹{{ total_fee_billed|floatformat:2 }}</strong>
-            </div>
-            <div style="background-color: #f0fdf4; padding: 1rem; border-radius: 8px; border: 1px solid #bbf7d0;">
-                <span style="font-size: 0.8rem; color: #166534; display: block; margin-bottom: 0.25rem;">Collected Revenue</span>
-                <strong style="font-size: 1.25rem; color: #15803d;">₹{{ total_fee_collected|floatformat:2 }}</strong>
-            </div>
-            <div style="background-color: #fef2f2; padding: 1rem; border-radius: 8px; border: 1px solid #fecaca;">
-                <span style="font-size: 0.8rem; color: #991b1b; display: block; margin-bottom: 0.25rem;">Pending Due</span>
-                <strong style="font-size: 1.25rem; color: #b91c1c;">₹{{ total_fee_pending|floatformat:2 }}</strong>
-            </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'core:student_list' %}" class="btn" style="font-size: 0.8rem; padding: 0.45rem 0.95rem; background: #2563eb; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 2px 6px rgba(37,99,235,0.25);">
+                <i class="fa-solid fa-list-check"></i> Manage All Students
+            </a>
+            <a href="{% url 'core:fee_list' %}" class="btn" style="font-size: 0.8rem; padding: 0.45rem 0.95rem; background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                <i class="fa-solid fa-coins"></i> Fee Collection
+            </a>
         </div>
     </div>
 
-    <!-- Active Academic Session Card -->
-    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-            <h3 class="card-title" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 0.75rem;">
-                <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary-color); margin-right: 6px;"></i> Active Academic Session
-            </h3>
-            <div style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.5rem;">
-                <strong>Academic Year:</strong> {{ current_year.name|default:"Not configured" }}
+    <!-- Student Key Metrics Grid -->
+    <div class="grid-stats">
+        <div class="card stat-card" style="border-left: 4px solid #2563eb; background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);">
+            <div class="stat-icon" style="background-color: #dbeafe; color: #2563eb;">
+                <i class="fa-solid fa-user-graduate"></i>
             </div>
-            <div style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.5rem;">
-                <strong>Active Term:</strong> {{ current_sem.name|default:"Not configured" }}
+            <div>
+                <div class="stat-val" style="color: #1e3a8a;">{{ students_count }}</div>
+                <div class="stat-lbl" style="color: #3b82f6;">Enrolled Students</div>
             </div>
         </div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); pt: 0.5rem;">
-            <i class="fa-solid fa-circle-check" style="color: #10b981; margin-right: 4px;"></i> MySQL Engine Status: Healthy
+
+        <div class="card stat-card" style="border-left: 4px solid #059669; background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);">
+            <div class="stat-icon" style="background-color: #d1fae5; color: #059669;">
+                <i class="fa-solid fa-clipboard-user"></i>
+            </div>
+            <div>
+                <div class="stat-val" style="color: #065f46;">{{ student_attendance_count }}</div>
+                <div class="stat-lbl" style="color: #10b981;">Student Attendance Logs</div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Department & Course Overview Lists -->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-    <div class="card" style="padding: 0; overflow: hidden;">
-        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 0.95rem;"><i class="fa-solid fa-building-columns" style="color: var(--primary-color); margin-right: 6px;"></i> Recent Departments</span>
-            <a href="{% url 'core:department_list' %}" style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600; text-decoration: none;">View All</a>
+
+<!-- ==================================================================== -->
+<!-- SECTION 2: FACULTY MANAGEMENT DASHBOARD (Green Theme)               -->
+<!-- ==================================================================== -->
+<div style="background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); border: 1.5px solid #a7f3d0; border-radius: 16px; padding: 1.75rem; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.05);">
+    
+    <!-- Section Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d1fae5; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <h2 style="font-size: 1.35rem; font-weight: 700; color: #065f46; display: flex; align-items: center; gap: 10px; margin: 0;">
+                <span style="background: #059669; color: #ffffff; padding: 6px 12px; border-radius: 10px; font-size: 1rem; box-shadow: 0 2px 6px rgba(5,150,105,0.3);"><i class="fa-solid fa-chalkboard-user"></i></span>
+                Faculty Management Dashboard
+            </h2>
+            <p style="color: #374151; font-size: 0.85rem; margin-top: 4px; margin-bottom: 0;">Faculty details, department assignments & faculty attendance monitoring.</p>
         </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-            <tbody>
-                {% for dept in recent_departments %}
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                        <td style="padding: 0.75rem 1.25rem; font-weight: 700; color: var(--primary-color);">{{ dept.code }}</td>
-                        <td style="padding: 0.75rem 1.25rem;">{{ dept.name }}</td>
-                    </tr>
-                {% empty %}
-                    <tr><td style="padding: 1.5rem; text-align: center; color: var(--text-muted);">No active departments.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'core:teacher_list' %}" class="btn" style="font-size: 0.8rem; padding: 0.45rem 0.95rem; background: #059669; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 2px 6px rgba(5,150,105,0.25);">
+                <i class="fa-solid fa-user-tie"></i> Manage Faculty Directory
+            </a>
+            <a href="{% url 'core:teacher_attendance_list' %}" class="btn" style="font-size: 0.8rem; padding: 0.45rem 0.95rem; background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                <i class="fa-solid fa-user-check"></i> Faculty Attendance Log
+            </a>
+        </div>
     </div>
 
-    <div class="card" style="padding: 0; overflow: hidden;">
-        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 0.95rem;"><i class="fa-solid fa-book-bookmark" style="color: var(--primary-color); margin-right: 6px;"></i> Featured Course Programs</span>
-            <a href="{% url 'core:course_list' %}" style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600; text-decoration: none;">View All</a>
+    <!-- Faculty Key Metrics Grid -->
+    <div class="grid-stats">
+        <div class="card stat-card" style="border-left: 4px solid #10b981; background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);">
+            <div class="stat-icon" style="background-color: #d1fae5; color: #10b981;">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div>
+                <div class="stat-val" style="color: #065f46;">{{ teachers_count }}</div>
+                <div class="stat-lbl" style="color: #10b981;">Active Faculty Members</div>
+            </div>
         </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-            <tbody>
-                {% for course in recent_courses %}
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                        <td style="padding: 0.75rem 1.25rem; font-weight: 700; color: var(--primary-color);">{{ course.code }}</td>
-                        <td style="padding: 0.75rem 1.25rem;">{{ course.name }}</td>
-                        <td style="padding: 0.75rem 1.25rem; color: var(--text-muted);">{{ course.duration_years }} yrs</td>
-                    </tr>
-                {% empty %}
-                    <tr><td style="padding: 1.5rem; text-align: center; color: var(--text-muted);">No active courses.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+        <div class="card stat-card" style="border-left: 4px solid #9333ea; background: linear-gradient(135deg, #ffffff 0%, #f3e8ff 100%);">
+            <div class="stat-icon" style="background-color: #e9d5ff; color: #9333ea;">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div>
+                <div class="stat-val" style="color: #581c87;">{{ teacher_attendance_count }}</div>
+                <div class="stat-lbl" style="color: #9333ea;">Faculty Attendance Logs</div>
+            </div>
+        </div>
+
+        <div class="card stat-card" style="border-left: 4px solid #0284c7; background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);">
+            <div class="stat-icon" style="background-color: #bae6fd; color: #0284c7;">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+            <div>
+                <div class="stat-val" style="color: #0c4a6e;">{{ dept_count }}</div>
+                <div class="stat-lbl" style="color: #0284c7;">Academic Departments</div>
+            </div>
+        </div>
+
+        <div class="card stat-card" style="border-left: 4px solid #f59e0b; background: linear-gradient(135deg, #ffffff 0%, #fef3c7 100%);">
+            <div class="stat-icon" style="background-color: #fde68a; color: #f59e0b;">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div>
+                <div class="stat-val" style="color: #78350f;">{{ course_count }}</div>
+                <div class="stat-lbl" style="color: #d97706;">B.Tech Degree Programs</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- B.Tech Faculty Department Directory Grid (Color Coded Stream Cards) -->
+    <div style="margin-top: 1.75rem; background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); border: 1.5px solid #a7f3d0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: #065f46; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-chalkboard-user" style="color: #059669;"></i> B.Tech Faculty Stream Directory
+                </h4>
+                <p style="font-size: 0.8rem; color: #047857; opacity: 0.85; margin: 3px 0 0 0;">Click on any stream department below to view its active faculty members.</p>
+            </div>
+            <a href="{% url 'core:teacher_list' %}" style="font-size: 0.75rem; background: #d1fae5; color: #047857; padding: 5px 12px; border-radius: 20px; font-weight: 700; border: 1px solid #a7f3d0; text-decoration: none;">
+                <i class="fa-solid fa-user-tie"></i> View All Faculty &rarr;
+            </a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            {% for stream in stream_data %}
+                <a href="{% url 'core:teacher_list' %}?search={{ stream.code }}" 
+                   class="dept-stream-card" 
+                   style="background: {{ stream.bg_gradient }}; border: 1.5px solid {{ stream.border_color }}; padding: 1.1rem; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-weight: 800; font-size: 1.15rem; color: {{ stream.text_color }}; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid {{ stream.icon }}" style="font-size: 0.95rem;"></i>
+                            {{ stream.code }}
+                        </span>
+                        <span style="font-size: 0.75rem; font-weight: 700; background: {{ stream.badge_bg }}; color: {{ stream.badge_text }}; padding: 3px 8px; border-radius: 12px; border: 1px solid {{ stream.border_color }};">
+                            {{ stream.teacher_count }} Faculty
+                        </span>
+                    </div>
+
+                    <div style="font-size: 0.8rem; font-weight: 600; color: {{ stream.text_color }}; opacity: 0.9; margin-bottom: 10px;">
+                        {{ stream.name }}
+                    </div>
+
+                    <div style="font-size: 0.75rem; font-weight: 700; background: rgba(255, 255, 255, 0.85); padding: 5px 8px; border-radius: 6px; color: {{ stream.badge_text }}; border: 1px dashed {{ stream.border_color }}; display: flex; justify-content: space-between; align-items: center;">
+                        <span>View {{ stream.code }} Faculty</span>
+                        <i class="fa-solid fa-arrow-right-long" style="font-size: 0.75rem; color: {{ stream.accent }};"></i>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -47,26 +47,48 @@ body {
     background-color: var(--bg-body);
     color: var(--text-main);
     display: flex;
-    min-height: 100vh;
-    overflow-x: hidden;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
 }
 
 /* Layout Structure */
 .app-container {
     display: flex;
     width: 100vw;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* Sidebar Styles */
+/* Sidebar Styles - Fixed on left, does not scroll with main content */
 .sidebar {
     width: 260px;
+    height: 100vh;
+    max-height: 100vh;
     background-color: var(--bg-sidebar);
     color: var(--text-sidebar);
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     transition: transform var(--transition-normal);
     z-index: 100;
+}
+
+/* Sleek custom scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .sidebar-header {
@@ -130,15 +152,33 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Main Content Area */
+/* Main Content Area - Scrollable Right Side */
 .main-wrapper {
     flex-grow: 1;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-/* Navbar */
+/* Custom sleek scrollbar for main content area */
+.main-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+.main-wrapper::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+.main-wrapper::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.main-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Navbar - Stays at top of right side */
 .navbar {
     height: 64px;
     background-color: var(--bg-surface);
@@ -148,6 +188,10 @@ body {
     justify-content: space-between;
     padding: 0 1.75rem;
     box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex-shrink: 0;
 }
 
 .navbar-left {
@@ -318,11 +362,24 @@ body {
 
 /* Responsive Media Queries */
 @media (max-width: 768px) {
+    body {
+        height: auto;
+        overflow: auto;
+    }
+    .app-container {
+        height: auto;
+        overflow: visible;
+    }
+    .main-wrapper {
+        height: auto;
+        overflow: visible;
+    }
     .sidebar {
         position: fixed;
         left: -260px;
         top: 0;
         bottom: 0;
+        height: 100vh;
     }
     .sidebar.open {
         transform: translateX(260px);
